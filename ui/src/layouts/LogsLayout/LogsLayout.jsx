@@ -2,6 +2,8 @@ import classNames from "classnames"
 import ControlsLogsLayout from "./ControlsLogsLayout"
 import Header from "../Header/Header"
 import { Outlet } from "react-router-dom"
+import Footer from "../Footer/Footer"
+import { footerLinksToLogs } from "../../constant/footerLinks"
 
 const LogsLayout = () => {
     
@@ -21,6 +23,8 @@ const LogsLayout = () => {
             <Outlet/>
         </div>
 
-        
+        <Footer links={footerLinksToLogs}/>
     </section>
 }
+
+export default LogsLayout;

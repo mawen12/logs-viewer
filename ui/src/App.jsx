@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route } from "react-router-dom"
+import LogsLayout from "./layouts/LogsLayout/LogsLayout"
 
 const App = () => {
 
@@ -7,9 +8,12 @@ const App = () => {
             <Routes>
                 <Route 
                     path={"/"}
-                    element={}
+                    element={<LogsLayout/>}
                 >
-                    
+                    <Route
+                        path={"/"}
+                        element={<QueryPage/>}
+                    />
                 </Route>
             </Routes>
         </HashRouter>
