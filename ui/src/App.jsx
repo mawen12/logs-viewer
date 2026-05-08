@@ -5,13 +5,9 @@ const App = () => {
     return <>
         <HashRouter>
             <Routes>
-                <Route 
-                    path={"/"}
-                    element={}
-                >
-                    
-                </Route>
             </Routes>
         </HashRouter>
     </>
 }
+
+export default App;

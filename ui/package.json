@@ -4,16 +4,22 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"storybook": "storybook dev -p 6006",
+		"build-storybook": "storybook build"
 	},
 	"dependencies": {
 		"classnames": "^2.5.1",
 		"preact": "^10.26.9",
-		"preact-iso": "^2.12.0",
 		"react-router-dom": "^7.15.0"
 	},
 	"devDependencies": {
 		"@preact/preset-vite": "^2.10.2",
+		"@storybook/addon-essentials": "^8.6.18",
+		"@storybook/preact-vite": "^8.6.18",
+		"@storybook/test": "^8.6.18",
+		"sass-embedded": "^1.99.0",
+		"storybook": "^8.6.18",
 		"vite": "^7.0.4"
 	}
 }
