@@ -1,35 +1,32 @@
-import { defineConfig } from 'vite';
-import preact from '@preact/preset-vite';
+import { fileURLToPath, URL } from 'node:url'
 
-import * as path from "path";
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import vueDevTools from 'vite-plugin-vue-devtools'
+import ViteFonts from 'unplugin-fonts/vite'
+import vuetify from 'vite-plugin-vuetify'
 
-// https://vitejs.dev/config/
+// https://vite.dev/config/
 export default defineConfig({
-	base: "",
-	plugins: [
-		preact()
-	],
-	assetsInclude: ["**/*.md"],
-	server: {
-		open: true,
-		port: 3000,
-		proxy: undefined,
-	},
-	resolve: {
-		alias: {
-			"src": path.resolve(__dirname, "src"),
-		}
-	},
-	build: {
-		outDir: "./build",
-		rollupOptions: {
-			output: {
-				manualChunks(id) {
-					if (id.includes("node_modules")) {
-						return "vendor"
-					}
-				}
-			}
-		}
-	}
-});
+  plugins: [
+    vue(),
+    vueDevTools(),
+    vuetify(),
+    ViteFonts({
+            fontsource: {
+                families: [
+                    {
+                        name: 'Roboto',
+                        weights: [100, 300, 400, 500, 700, 900],
+                        styles: ['normal', 'italic'],
+                    },
+                ],
+            },
+      }),
+  ],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url))
+    },
+  },
+})
