@@ -1,6 +1,7 @@
 import { createContext } from "preact";
 import { useContext, useMemo, useReducer } from "preact/compat";
 import { initialAppState, reducer } from "./reducer";
+import { CssBaseline } from "@mui/material";
 
 export const StateContext = createContext({});
 
@@ -23,6 +24,7 @@ export const AppStateProvider = ({children}) => {
 
     return <>
         <StateContext.Provider value={contextValue}>
+            <CssBaseline/>
             {children}
         </StateContext.Provider>
     </>
