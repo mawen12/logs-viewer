@@ -9,7 +9,7 @@ const Home = () => {
   return (
     <Box
       sx={{
-        m: 2,
+        p: 2,
         height: "100%",
       }}
     >
@@ -28,11 +28,7 @@ const Home = () => {
 
         {/* log table region */}
         {/* <LogTableRegion/> */}
-        <LogDataTableRegion
-          sx={{
-            height: "100%",
-          }}
-        />
+        <LogDataTableRegion/>
       </Stack>
     </Box>
   );

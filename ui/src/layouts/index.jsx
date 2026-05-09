@@ -18,8 +18,9 @@ const AppLayout = () => {
   return (
     <Box
       sx={{
-        // flexGrow: 1,
         height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <AppBar position="static" color="inherit">
@@ -41,7 +42,10 @@ const AppLayout = () => {
         </Toolbar>
       </AppBar>
 
+      <div style={{flexGrow: 1, overflow: 'hidden'}}>
       <Outlet />
+      </div>
+      
     </Box>
   );
 };

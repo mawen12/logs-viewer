@@ -1,4 +1,4 @@
-import { Box, Paper } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useMemo, useRef, useState } from "preact/compat";
 import useResizeObserver from "../../../hooks/useResizeObserver";
@@ -231,10 +231,10 @@ const columns = [
       <Box
         sx={{
           whiteSpace: "normal !important",
-          wordBreak: "break-word",
+          // wordBreak: "break-word",
           lineHeight: "normal",
-          display: "flex",
-          alignItems: "center",
+          // display: "flex",
+          // alignItems: "center",
         }}
       >
         {params.value}
@@ -255,13 +255,12 @@ const LogDataTableRegion = () => {
   useResizeObserver({ ref: containerRef, onResize: setContainerSize });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", overflow:'auto' }}>
       <DataGrid
-        // autoHeight
         rows={rows}
         columns={columns}
         density="compact"
-        sx={{ height: "100%" }}
+        pagination={false}
       />
     </div>
   );
