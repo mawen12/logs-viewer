@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"io"
 	neturl "net/url"
 	"os"
 	"strings"
@@ -26,25 +25,6 @@ type ParsedUrl struct {
 	host     string
 	port     string
 	log      string
-}
-
-type SshConn struct {
-	client  *ssh.Client
-	session *ssh.Session
-
-	stdin                io.WriteCloser
-	stdout, stderr       io.Reader
-	stdoutBuf, stderrBuf *bufio.Reader
-}
-
-func (conn *SshConn) Start() {
-// TODO
-}
-
-
-func (conn *SshConn) Close() {
-	conn.session.Close()
-	conn.client.Close()
 }
 
 func NewReader(configPath string) *Reader {
