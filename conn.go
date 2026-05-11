@@ -36,7 +36,7 @@ type SshConnConfig struct {
 
 type SshConn struct {
 	prefixPath string
-	logPath    string
+	url        ParsedUrl
 
 	client  *ssh.Client
 	session *ssh.Session
@@ -90,7 +90,7 @@ func NewSshConn(pathPrefix string, url ParsedUrl) (*SshConn, error) {
 
 	return &SshConn{
 		prefixPath: pathPrefix,
-		logPath:    url.log,
+		url:        url,
 		client:     client,
 		session:    session,
 		stdin:      stdin,
@@ -130,7 +130,7 @@ func (conn *SshConn) start() ([]byte, error) {
 		"SearchPath":    "agent_search.sh",
 		"SearchContent": searchSh,
 		"IndexFile":     "index.log",
-		"LogFile":       conn.logPath,
+		"LogFile":       conn.url.log,
 	}
 	err := t.Execute(&buf, params)
 	if err != nil {
@@ -166,7 +166,7 @@ func (conn *SshConn) query(param QueryParam) ([]byte, error) {
 		"AgentPath":   fmt.Sprintf("%s/%s", conn.prefixPath, "agent.sh"),
 		"IndexFile":   fmt.Sprintf("%s/%s", conn.prefixPath, "index.log"),
 		"MaxNumLines": param.MaxNumLines,
-		"LogFile":     conn.logPath,
+		"LogFile":     conn.url.log,
 		"FromExists":  param.FromStr() != "",
 		"From":        shellQuote(param.FromStr()),
 		"ToExists":    param.ToStr() != "",
@@ -223,6 +223,7 @@ Loop:
 				messageCompose.Errs = append(messageCompose.Errs, errors.New(ret.Message))
 			case *DataRet:
 				messageCompose.Logs = append(messageCompose.Logs, Log{
+					stream:  conn.url.stream,
 					num:     ret.CurNR,
 					message: ret.Message,
 				})

@@ -11,17 +11,23 @@ type QueryParam struct {
 	Pattern     string
 	From        time.Time
 	To          time.Time
-	LoadEasier  bool
 	LineUtil    int
 	MaxNumLines int
+	extParam    map[string]QueryParam
 }
 
 func (param QueryParam) FromStr() string {
-	return ""
+	if param.From.IsZero() {
+		return ""
+	}
+	return param.From.Format("2006-01-02 15:04:05")
 }
 
 func (param QueryParam) ToStr() string {
-	return ""
+	if param.To.IsZero() {
+		return ""
+	}
+	return param.To.Format("2006-01-02 15:04:05")
 }
 
 type MessageCompose struct {
@@ -34,6 +40,7 @@ type MessageCompose struct {
 }
 
 type Log struct {
+	stream  string
 	num     int
 	file    string
 	message string

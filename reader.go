@@ -8,6 +8,7 @@ import (
 	neturl "net/url"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/google/uuid"
 )
@@ -21,6 +22,8 @@ type Reader struct {
 }
 
 type ParsedUrl struct {
+	source   string
+	stream   string
 	username string
 	password string
 	host     string
@@ -84,6 +87,8 @@ func parse(line string) (ParsedUrl, error) {
 	password, _ := u.User.Password()
 
 	return ParsedUrl{
+		source:   line,
+		stream:   fmt.Sprintf("%s:%s", u.Hostname(), u.Path),
 		username: u.User.Username(),
 		password: password,
 		host:     u.Hostname(),
@@ -116,15 +121,37 @@ func (r *Reader) Connect() error {
 	return nil
 }
 
-func (r *Reader) Query(param QueryParam) error {
+type MessageComposeAndErr struct {
+	MessageCompose *MessageCompose
+	Err            error
+}
+
+func (r *Reader) Query(param QueryParam) []MessageComposeAndErr {
+	retChan := make(chan MessageComposeAndErr, len(r.conns))
+	wg := sync.WaitGroup{}
+	wg.Add(len(r.conns))
+
 	for _, conn := range r.conns {
-		msg, err := conn.Query(param)
-		if err != nil {
-			return err
-		}
-		log.Println("query msg", msg)
+		go func() {
+			msg, err := conn.Query(param)
+			retChan <- MessageComposeAndErr{
+				MessageCompose: msg,
+				Err:            err,
+			}
+			wg.Done()
+		}()
 	}
-	return nil
+
+	go func() {
+		wg.Wait()
+		close(retChan)
+	}()
+
+	rets := make([]MessageComposeAndErr, 0)
+	for ret := range retChan {
+		rets = append(rets, ret)
+	}
+	return rets
 }
 
 func (r *Reader) Close() error {
