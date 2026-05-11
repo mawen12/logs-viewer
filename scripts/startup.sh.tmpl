@@ -1,0 +1,90 @@
+echo 'A:'
+echo 'A:' 1>&2
+echo 'N:start run startup.sh'
+
+cd
+rm -rf {{ .PrefixPath }}
+if [ $? -ne 0 ]; then
+  echo 'E:1:rm {{ .PrefixPath }} failed' 1>&2
+  exit 1
+else
+  echo 'N:rm {{ .PrefixPath }} success'
+fi
+
+mkdir -p {{ .PrefixPath }}
+if [ $? -ne 0 ]; then
+  echo 'E:1:create {{ .PrefixPath }} failed' 1>&2
+  exit 1
+else
+  echo 'N:mkdir -p {{ .PrefixPath }} success'  
+fi
+
+cd {{ .PrefixPath }}
+if [ $? -ne 0 ]; then
+  echo 'E:1:cd {{ .PrefixPath }} failed' 1>&2
+  exit 1
+else
+  echo 'N:cd {{ .PrefixPath }} success'   
+fi
+
+  cat <<- 'EOF' > {{ .AgentPath }}
+{{ .AgentContent }}
+EOF
+
+  cat <<- 'EOF' > {{ .AgentPath }}
+{{ .AgentContent }}
+EOF
+
+if [ $? -ne 0 ]; then
+  echo 'E:1:save agent failed' 1>&2
+  exit 1;
+else
+  echo 'N:save agent success'
+fi
+
+  cat <<- 'EOF' > {{ .LibPath }}
+{{ .LibContent }}
+EOF
+
+if [ $? -ne 0 ]; then
+  echo 'E:1:save {{ .LibPath }} failed' 1>&2
+  exit 1;
+else
+  echo 'N:save {{ .LibPath }} success'
+fi
+
+  cat <<- 'EOF' > {{ .IndexPath }}
+{{ .IndexContent }}
+EOF
+
+if [ $? -ne 0 ]; then
+  echo 'E:1:save {{ .IndexPath }} failed' 1>&2
+  exit 1;
+else
+  echo 'N:save {{ .IndexPath }} success'
+fi
+
+  cat <<- 'EOF' > {{ .SearchPath }}
+{{ .SearchContent }}
+EOF
+
+if [ $? -ne 0 ]; then
+  echo 'E:1:save {{ .SearchPath }} failed' 1>&2
+  exit 1;
+else
+  echo 'N:save {{ .SearchPath }} success'
+fi
+
+bash {{ .AgentPath }} logstream_info --logfile {{ .LogFile }} 
+# bash {{ .AgentPath }} logstream_info --logfile '/Users/mawen/logs/app.log' 
+# bash {{ .AgentPath }} query --logfile '/home/mawen/logs/app.log' --index-file 'index.log' --max-num-lines 10
+
+if [ $? -ne 0 ]; then
+  echo 'E:1:startup failed' 1>&2
+  exit 1
+else 
+  echo 'N:startup ok'
+fi
+
+echo 'Z:'
+echo 'Z:' 1>&2

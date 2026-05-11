@@ -4,16 +4,17 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"log"
 	neturl "net/url"
 	"os"
 	"strings"
-	"time"
 
-	"golang.org/x/crypto/ssh"
+	"github.com/google/uuid"
 )
 
 type Reader struct {
 	configPath string
+	prefixPath string
 	lines      []string
 	urls       []ParsedUrl
 	conns      []*SshConn
@@ -30,6 +31,7 @@ type ParsedUrl struct {
 func NewReader(configPath string) *Reader {
 	return &Reader{
 		configPath: configPath,
+		prefixPath: fmt.Sprintf("/tmp/%s", uuid.New().String()),
 		lines:      make([]string, 0),
 		urls:       make([]ParsedUrl, 0),
 		conns:      make([]*SshConn, 0),
@@ -42,6 +44,8 @@ func (r *Reader) Read() error {
 		return err
 	}
 	defer file.Close()
+
+	log.Println("path prefix", r.prefixPath)
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -94,69 +98,33 @@ func (r *Reader) Connect() error {
 	}
 
 	for _, url := range r.urls {
-		conn, err := connect(url)
+		conn, err := NewSshConn(r.prefixPath, url)
 		if err != nil {
 			return err
 		}
 
 		r.conns = append(r.conns, conn)
 	}
+
+	for _, conn := range r.conns {
+		msg, err := conn.Start()
+		if err != nil {
+			return err
+		}
+		log.Println("connect msg", msg)
+	}
 	return nil
 }
 
-func connect(url ParsedUrl) (*SshConn, error) {
-	client, err := ssh.Dial("tcp", url.host, &ssh.ClientConfig{
-		User: url.username,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(url.password),
-		},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         5 * time.Second,
-	})
-	if err != nil {
-		return nil, err
+func (r *Reader) Query(param QueryParam) error {
+	for _, conn := range r.conns {
+		msg, err := conn.Query(param)
+		if err != nil {
+			return err
+		}
+		log.Println("query msg", msg)
 	}
-
-	session, err := client.NewSession()
-	if err != nil {
-		return nil, err
-	}
-
-	if err := session.Start("/bin/sh"); err != nil {
-		return nil, err
-	}
-
-	stdin, err := session.StdinPipe()
-	if err != nil {
-		return nil, err
-	}
-
-	stdout, err := session.StdoutPipe()
-	if err != nil {
-		return nil, err
-	}
-
-	stderr, err := session.StderrPipe()
-	if err != nil {
-		return nil, err
-	}
-
-	stdoutBuf := bufio.NewReader(stdout)
-	stderrBuf := bufio.NewReader(stderr)
-
-	return &SshConn{
-		client:    client,
-		session:   session,
-		stdin:     stdin,
-		stdout:    stdout,
-		stderr:    stderr,
-		stdoutBuf: stdoutBuf,
-		stderrBuf: stderrBuf,
-	}, nil
-}
-
-func (r *Reader) Write() error {
-
+	return nil
 }
 
 func (r *Reader) Close() error {

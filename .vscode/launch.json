@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "Launch Package",
+            "name": "single",
             "type": "go",
             "request": "launch",
             "mode": "auto",
@@ -10,7 +10,17 @@
                 "--config",
                 "config-single.properties"
             ]
+        },
+        {
+            "name": "alpine",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": [
+                "--config",
+                "config-alpine.properties"
+            ]
         }
-    
     ]
 }
