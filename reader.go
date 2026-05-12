@@ -42,7 +42,7 @@ func NewReader(configPath string) *Reader {
 	}
 }
 
-func (r *Reader) Read() error {
+func (r *Reader) LoadConfig() error {
 	file, err := os.Open(r.configPath)
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func (r *Reader) Read() error {
 	return nil
 }
 
-func (r *Reader) Parse() error {
+func (r *Reader) ParseConfig() error {
 	if len(r.lines) == 0 {
 		return errors.New("cannot parse because lines is empty")
 	}
@@ -123,8 +123,8 @@ func (r *Reader) Connect(ctx context.Context) error {
 }
 
 type MessageComposeAndErr struct {
-	MessageCompose *MessageCompose
-	Err            error
+	MessageCompose *MessageCompose `json:"messageCompose"`
+	Err            error `json:"err"`
 }
 
 func (r *Reader) Query(ctx context.Context, param QueryParam) []MessageComposeAndErr {

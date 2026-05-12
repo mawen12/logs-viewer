@@ -221,9 +221,9 @@ Loop:
 				messageCompose.Errs = append(messageCompose.Errs, errors.New(ret.Message))
 			case *DataRet:
 				messageCompose.Logs = append(messageCompose.Logs, Log{
-					stream:  conn.url.stream,
-					num:     ret.CurNR,
-					message: ret.Message,
+					Stream:  conn.url.stream,
+					Num:     ret.CurNR,
+					Message: ret.Message,
 				})
 			case *StatRet:
 				messageCompose.Stats[ret.Time] = ret.Count
@@ -292,7 +292,10 @@ func (conn *SshConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 				// break
 				continue
 			}
-			fmt.Print("[STDOUT]", line)
+			if *debug {
+				fmt.Print("[STDOUT]", line)
+			}
+
 			line = strings.TrimRight(line, "\r\n")
 
 			var ret Ret
@@ -350,7 +353,10 @@ func (conn *SshConn) StderrReceive(ctx context.Context) chan RetAndErr {
 				// break
 				continue
 			}
-			fmt.Print("[STDERR]", line)
+			if *debug {
+				fmt.Print("[STDERR]", line)
+			}
+
 			line = strings.TrimRight(line, "\r\n")
 
 			var ret Ret

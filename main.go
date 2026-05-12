@@ -8,9 +8,13 @@ import (
 	"os"
 )
 
-var configPath = flag.String("config", "", "config file path")
-var failFast = flag.Bool("fail-fast", false, "fail fast when parse config file line")
-var logfile = flag.String("logfile", "logs.log", "log record file")
+var (
+	configPath = flag.String("config", "", "config file path")
+	failFast   = flag.Bool("fail-fast", false, "fail fast when parse config file line")
+	logfile    = flag.String("logfile", "logs.log", "log record file")
+	port       = flag.Int("port", 9081, "server port")
+	debug      = flag.Bool("debug", false, "debug")
+)
 
 var (
 	file   *os.File
@@ -53,14 +57,15 @@ func main() {
 	}
 
 	reader = NewReader(*configPath)
-	if err := reader.Read(); err != nil {
+	if err := reader.LoadConfig(); err != nil {
 		panic(err)
 	}
-	defer reader.Close()
 
-	reader.Debug()
+	if *debug {
+		reader.Debug()
+	}
 
-	if err := reader.Parse(); err != nil {
+	if err := reader.ParseConfig(); err != nil {
 		panic(err)
 	}
 
@@ -71,19 +76,23 @@ func main() {
 
 	log.Println("Connect success")
 
-	param := QueryParam{
-		Pattern:     "/INFO/",
-		MaxNumLines: 1,
+	if err := server(uint32(*port)); err != nil {
+		log.Fatal(err)
 	}
-	rets := reader.Query(ctx, param)
-	print(rets)
 
-	param = QueryParam{
-		Pattern:     "/INFO/",
-		MaxNumLines: 2,
-	}
-	rets = reader.Query(ctx, param)
-	print(rets)
+	// param := QueryParam{
+	// 	Pattern:     "/INFO/",
+	// 	MaxNumLines: 1,
+	// }
+	// rets := reader.Query(ctx, param)
+	// print(rets)
+
+	// param = QueryParam{
+	// 	Pattern:     "/INFO/",
+	// 	MaxNumLines: 2,
+	// }
+	// rets = reader.Query(ctx, param)
+	// print(rets)
 
 	// param = QueryParam{
 	// 	Pattern:     "/INFO/",
@@ -93,19 +102,19 @@ func main() {
 	// rets = reader.Query(ctx, param)
 	// print(rets)
 
-	fmt.Println("start clean the message")
-	rets = reader.Clean(ctx)
-	print(rets)
+	// fmt.Println("start clean the message")
+	// rets = reader.Clean(ctx)
+	// print(rets)
 }
 
-func print(rets []MessageComposeAndErr) {
-	for _, ret := range rets {
-		if ret.Err != nil {
-			fmt.Println("[ERROR]", ret.Err)
-		} else {
-			for _, log := range ret.MessageCompose.Logs {
-				fmt.Printf("[%s] %d:%s\n", log.stream, log.num, log.message)
-			}
-		}
-	}
-}
+// func print(rets []MessageComposeAndErr) {
+// 	for _, ret := range rets {
+// 		if ret.Err != nil {
+// 			fmt.Println("[ERROR]", ret.Err)
+// 		} else {
+// 			for _, log := range ret.MessageCompose.Logs {
+// 				fmt.Printf("[%s] %d:%s\n", log.stream, log.num, log.message)
+// 			}
+// 		}
+// 	}
+// }

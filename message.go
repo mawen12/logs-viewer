@@ -30,20 +30,29 @@ func (param QueryParam) ToStr() string {
 	return param.To.Format("2006-01-02 15:04:05")
 }
 
+func (param QueryParam) String() string {
+	return fmt.Sprintf("{from: %s, to: %s, pattern: %s, MaxNumLines: %d}",
+		param.FromStr(),
+		param.ToStr(),
+		param.Pattern,
+		param.MaxNumLines,
+	)
+}
+
 type MessageCompose struct {
 	Out OutMessage
 	Err ErrMessage
 
-	Logs  []Log
+	Logs  []Log `json:"logs"`
 	Stats map[string]int
 	Errs  []error
 }
 
 type Log struct {
-	stream  string
-	num     int
-	file    string
-	message string
+	Stream  string `json:"stream"`
+	Num     int    `json:"num"`
+	File    string `json:"file"`
+	Message string `json:"message"`
 }
 
 type OutMessage struct {

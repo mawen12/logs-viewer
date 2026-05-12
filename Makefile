@@ -5,4 +5,4 @@ run-single:
 	go run . --config config-single.properties	
 
 run-alpine:
-	go run . --config config-alpine.properties
+	go run . --config config-alpine.properties --debug
