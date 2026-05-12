@@ -1,7 +1,8 @@
+(
+trap 'echo "Z:" 1>&2; echo "Z:"' EXIT
+
 echo 'A:'
 echo 'A:' 1>&2
-
-echo 'N:bash {{.AgentPath}} query --index-file {{.IndexFile}} --max-num-lines {{.MaxNumLines}} --logfile {{.LogFile}} --from {{.From}} --to {{.To}} {{if .HasLineUtil}}--lines-until {{.LineUtil}}{{end}} {{if .RefreshIndex}}--refresh-index{{end}} {{ .Pattern}}'
 
 bash {{.AgentPath}} query \
   --index-file {{.IndexFile}} \
@@ -10,5 +11,5 @@ bash {{.AgentPath}} query \
   --from {{.From}} \
   --to {{.To}} {{if .HasLineUtil}}--lines-until {{.LineUtil}}{{end}} {{if .RefreshIndex}}--refresh-index{{end}} {{ .Pattern}}
 
-echo 'Z:'
-echo 'Z:' 1>&2
+exit 0
+)

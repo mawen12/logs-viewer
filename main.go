@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -11,7 +12,22 @@ var configPath = flag.String("config", "", "config file path")
 var failFast = flag.Bool("fail-fast", false, "fail fast when parse config file line")
 var logfile = flag.String("logfile", "logs.log", "log record file")
 
+var (
+	file   *os.File
+	reader *Reader
+)
+
 func main() {
+	defer func() {
+		if file != nil {
+			file.Close()
+		}
+
+		if reader != nil {
+			reader.Close()
+		}
+	}()
+
 	flag.Parse()
 
 	if configPath == nil {
@@ -26,19 +42,17 @@ func main() {
 			if err != nil {
 				log.Printf("Failed to access directory: %v", err)
 			} else {
-				f, err := os.OpenFile(fmt.Sprintf("%s/logs/%s", dir, *logfile), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+				file, err = os.OpenFile(fmt.Sprintf("%s/logs/%s", dir, *logfile), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 				if err != nil {
 					log.Printf("Failed to open log file: %v", err)
 				} else {
-					log.SetOutput(f)
-					fmt.Println(f.Name())
-					defer f.Close()
+					log.SetOutput(file)
 				}
 			}
 		}
 	}
 
-	reader := NewReader(*configPath)
+	reader = NewReader(*configPath)
 	if err := reader.Read(); err != nil {
 		panic(err)
 	}
@@ -50,7 +64,8 @@ func main() {
 		panic(err)
 	}
 
-	if err := reader.Connect(); err != nil {
+	ctx := context.Background()
+	if err := reader.Connect(ctx); err != nil {
 		panic(err)
 	}
 
@@ -60,22 +75,26 @@ func main() {
 		Pattern:     "/INFO/",
 		MaxNumLines: 1,
 	}
-	rets := reader.Query(param)
+	rets := reader.Query(ctx, param)
+	print(rets)
+
+	param = QueryParam{
+		Pattern:     "/INFO/",
+		MaxNumLines: 2,
+	}
+	rets = reader.Query(ctx, param)
 	print(rets)
 
 	// param = QueryParam{
 	// 	Pattern:     "/INFO/",
-	// 	MaxNumLines: 2,
+	// 	MaxNumLines: 1,
+	// 	LineUtil:    22,
 	// }
-	// rets = reader.Query(param)
+	// rets = reader.Query(ctx, param)
 	// print(rets)
 
-	param = QueryParam{
-		Pattern:     "/INFO/",
-		MaxNumLines: 1,
-		LineUtil:    22,
-	}
-	rets = reader.Query(param)
+	fmt.Println("start clean the message")
+	rets = reader.Clean(ctx)
 	print(rets)
 }
 

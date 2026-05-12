@@ -1,4 +1,4 @@
-# trap 'echo "exit_code:$?"' EXIT
+trap 'echo "N:exit_code:$?"' EXIT
 
 source "$(dirname "${BASH_SOURCE[0]}")/agent_lib.sh"
 

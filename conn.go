@@ -21,6 +21,9 @@ var (
 	startShTemplate string
 	//go:embed scripts/query.sh.tmpl
 	queryShTemplate string
+	//go:embed scripts/clean.sh.tmpl
+	cleanShTmpleate string
+
 	//go:embed scripts/agent.sh
 	agentSh string
 	//go:embed scripts/agent_lib.sh
@@ -102,23 +105,7 @@ func NewSshConn(pathPrefix string, url ParsedUrl) (*SshConn, error) {
 	}, nil
 }
 
-func (conn *SshConn) Start() (*MessageCompose, error) {
-	bs, err := conn.start()
-	if err != nil {
-		return nil, err
-	}
-	if _, err = conn.stdin.Write(bs); err != nil {
-		return nil, err
-	}
-
-	return conn.receive()
-}
-
-func (conn *SshConn) start() ([]byte, error) {
-	// 必须要使用 text/template
-	t := template.Must(template.New("bootstrap").Parse(startShTemplate))
-	var buf bytes.Buffer
-
+func (conn *SshConn) Start(ctx context.Context) (*MessageCompose, error) {
 	params := map[string]any{
 		"PrefixPath":    conn.prefixPath,
 		"AgentPath":     "agent.sh",
@@ -132,21 +119,7 @@ func (conn *SshConn) start() ([]byte, error) {
 		"IndexFile":     "index.log",
 		"LogFile":       conn.url.log,
 	}
-	err := t.Execute(&buf, params)
-	if err != nil {
-		return nil, err
-	}
-
-	bs := buf.Bytes()
-	if bs[len(bs)-1] != '\n' {
-		bs = append(bs, '\n')
-	}
-
-	return bs, nil
-}
-
-func (conn *SshConn) Query(param QueryParam) (*MessageCompose, error) {
-	bs, err := conn.query(param)
+	bs, err := conn.template(startShTemplate, params)
 	if err != nil {
 		return nil, err
 	}
@@ -154,14 +127,10 @@ func (conn *SshConn) Query(param QueryParam) (*MessageCompose, error) {
 		return nil, err
 	}
 
-	return conn.receive()
+	return conn.receive(ctx)
 }
 
-func (conn *SshConn) query(param QueryParam) ([]byte, error) {
-	// 必须要使用 text/template
-	t := template.Must(template.New("bootstrap").Parse(queryShTemplate))
-	var buf bytes.Buffer
-
+func (conn *SshConn) Query(ctx context.Context, param QueryParam) (*MessageCompose, error) {
 	params := map[string]any{
 		"AgentPath":   fmt.Sprintf("%s/%s", conn.prefixPath, "agent.sh"),
 		"IndexFile":   fmt.Sprintf("%s/%s", conn.prefixPath, "index.log"),
@@ -175,6 +144,41 @@ func (conn *SshConn) query(param QueryParam) ([]byte, error) {
 		"HasLineUtil": param.LineUtil != 0,
 		"LineUtil":    param.LineUtil,
 	}
+	bs, err := conn.template(queryShTemplate, params)
+	if err != nil {
+		return nil, err
+	}
+	if _, err = conn.stdin.Write(bs); err != nil {
+		return nil, err
+	}
+
+	return conn.receive(ctx)
+}
+
+func shellQuote(s string) string {
+	return fmt.Sprintf("'%s'", strings.Replace(s, "'", "'\"'\"'", -1))
+}
+
+func (conn *SshConn) Clean(ctx context.Context) (*MessageCompose, error) {
+	params := map[string]any{
+		"PrefixPath": conn.prefixPath,
+	}
+	bs, err := conn.template(cleanShTmpleate, params)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err = conn.stdin.Write(bs); err != nil {
+		return nil, err
+	}
+
+	return conn.receive(ctx)
+}
+
+func (conn *SshConn) template(tmpl string, params map[string]any) ([]byte, error) {
+	t := template.Must(template.New("bootstrap").Parse(tmpl))
+	var buf bytes.Buffer
+
 	err := t.Execute(&buf, params)
 	if err != nil {
 		return nil, err
@@ -188,12 +192,7 @@ func (conn *SshConn) query(param QueryParam) ([]byte, error) {
 	return bs, nil
 }
 
-func shellQuote(s string) string {
-	return fmt.Sprintf("'%s'", strings.Replace(s, "'", "'\"'\"'", -1))
-}
-
-func (conn *SshConn) receive() (*MessageCompose, error) {
-	ctx := context.Background()
+func (conn *SshConn) receive(ctx context.Context) (*MessageCompose, error) {
 	var stdoutEnd, stderrEnd bool
 	messageCompose := &MessageCompose{
 		Stats: make(map[string]int, 0),
@@ -217,7 +216,6 @@ Loop:
 			case *BeginRet:
 
 			case *EndRet:
-				log.Println("stdout end")
 				stdoutEnd = true
 			case *ErrRet:
 				messageCompose.Errs = append(messageCompose.Errs, errors.New(ret.Message))
@@ -232,7 +230,7 @@ Loop:
 			case *ExtRet:
 				conn.exts[ret.Key] = ret.Value
 			case *DebugRet:
-				log.Println("[DEBUG]", ret.Message)
+				log.Println("[DEBUG-stdout]", ret.Message)
 			case *UnknownRet:
 				log.Println("[UNKNOWN]", ret)
 			default:
@@ -258,9 +256,8 @@ Loop:
 			case *ErrRet:
 				messageCompose.Errs = append(messageCompose.Errs, errors.New(ret.Message))
 			case *DebugRet:
-				log.Println("[DEBUG]", ret.Message)
+				log.Println("[DEBUG-stderr]", ret.Message)
 			case *EndRet:
-				log.Println("stderr end")
 				stderrEnd = true
 			case *UnknownRet:
 				log.Println("[UNKNOWN]", ret)
@@ -295,7 +292,7 @@ func (conn *SshConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 				// break
 				continue
 			}
-			// log.Print("[STDOUT]", line)
+			fmt.Print("[STDOUT]", line)
 			line = strings.TrimRight(line, "\r\n")
 
 			var ret Ret
@@ -328,7 +325,13 @@ func (conn *SshConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 			}
 
 			err = ret.Decode([]byte(line))
-			retChan <- RetAndErr{Err: err, Ret: ret}
+
+			select {
+			case <-ctx.Done():
+				return
+			case retChan <- RetAndErr{Err: err, Ret: ret}:
+			}
+
 		}
 	}()
 
@@ -347,7 +350,7 @@ func (conn *SshConn) StderrReceive(ctx context.Context) chan RetAndErr {
 				// break
 				continue
 			}
-			// log.Print("[STDERR]", line)
+			fmt.Print("[STDERR]", line)
 			line = strings.TrimRight(line, "\r\n")
 
 			var ret Ret
@@ -374,7 +377,12 @@ func (conn *SshConn) StderrReceive(ctx context.Context) chan RetAndErr {
 			}
 
 			err = ret.Decode([]byte(line))
-			retChan <- RetAndErr{Err: err, Ret: ret}
+			select {
+			case <-ctx.Done():
+				return
+			case retChan <- RetAndErr{Err: err, Ret: ret}:
+			}
+
 		}
 	}()
 

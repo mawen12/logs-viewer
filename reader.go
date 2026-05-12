@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -97,7 +98,7 @@ func parse(line string) (ParsedUrl, error) {
 	}, nil
 }
 
-func (r *Reader) Connect() error {
+func (r *Reader) Connect(ctx context.Context) error {
 	if len(r.urls) == 0 {
 		return errors.New("cannot connect because lines is empty")
 	}
@@ -112,7 +113,7 @@ func (r *Reader) Connect() error {
 	}
 
 	for _, conn := range r.conns {
-		msg, err := conn.Start()
+		msg, err := conn.Start(ctx)
 		if err != nil {
 			return err
 		}
@@ -126,19 +127,37 @@ type MessageComposeAndErr struct {
 	Err            error
 }
 
-func (r *Reader) Query(param QueryParam) []MessageComposeAndErr {
+func (r *Reader) Query(ctx context.Context, param QueryParam) []MessageComposeAndErr {
+	execute := func(ctx context.Context, c *SshConn) (*MessageCompose, error) {
+		return c.Query(ctx, param)
+	}
+
+	return r.parallelExecute(ctx, execute)
+}
+
+func (r *Reader) Clean(ctx context.Context) []MessageComposeAndErr {
+	execute := func(ctx context.Context, c *SshConn) (*MessageCompose, error) {
+		return c.Clean(ctx)
+	}
+	return r.parallelExecute(ctx, execute)
+}
+
+type executer func(ctx context.Context, c *SshConn) (*MessageCompose, error)
+
+func (r *Reader) parallelExecute(ctx context.Context, execute executer) []MessageComposeAndErr {
 	retChan := make(chan MessageComposeAndErr, len(r.conns))
 	wg := sync.WaitGroup{}
 	wg.Add(len(r.conns))
 
 	for _, conn := range r.conns {
 		go func() {
-			msg, err := conn.Query(param)
+			defer wg.Done()
+
+			msg, err := execute(ctx, conn)
 			retChan <- MessageComposeAndErr{
 				MessageCompose: msg,
 				Err:            err,
 			}
-			wg.Done()
 		}()
 	}
 

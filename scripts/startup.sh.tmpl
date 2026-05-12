@@ -1,3 +1,6 @@
+(
+trap 'echo "Z:" 1>&2; echo "Z:"' EXIT
+
 echo 'A:'
 echo 'A:' 1>&2
 echo 'N:start run startup.sh'
@@ -86,5 +89,6 @@ else
   echo 'N:startup ok'
 fi
 
-echo 'Z:'
-echo 'Z:' 1>&2
+#echo "Z:" 1>&2
+#echo "Z:"
+)
