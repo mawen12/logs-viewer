@@ -194,9 +194,7 @@ func (conn *SshConn) template(tmpl string, params map[string]any) ([]byte, error
 
 func (conn *SshConn) receive(ctx context.Context) (*MessageCompose, error) {
 	var stdoutEnd, stderrEnd bool
-	messageCompose := &MessageCompose{
-		Stats: make(map[string]int, 0),
-	}
+	messageCompose := &MessageCompose{}
 
 	stdoutChan := conn.StdoutReceive(ctx)
 	stderrChan := conn.StderrReceive(ctx)
@@ -226,7 +224,10 @@ Loop:
 					Message: ret.Message,
 				})
 			case *StatRet:
-				messageCompose.Stats[ret.Time] = ret.Count
+				messageCompose.Stats = append(messageCompose.Stats, Stat{
+					Time:  ret.Time,
+					Count: ret.Count,
+				})
 			case *ExtRet:
 				conn.exts[ret.Key] = ret.Value
 			case *DebugRet:

@@ -40,31 +40,20 @@ func (param QueryParam) String() string {
 }
 
 type MessageCompose struct {
-	Out OutMessage
-	Err ErrMessage
-
-	Logs  []Log `json:"logs"`
-	Stats map[string]int
-	Errs  []error
+	Logs  []Log   `json:"logs"`
+	Stats []Stat  `json:"stats"`
+	Errs  []error `json:"errs"`
 }
 
 type Log struct {
 	Stream  string `json:"stream"`
 	Num     int    `json:"num"`
-	File    string `json:"file"`
 	Message string `json:"message"`
 }
 
-type OutMessage struct {
-	DataLines []string
-}
-
-type ErrMessage struct {
-	Content string
-}
-
-type Message struct {
-	Line DataRet
+type Stat struct {
+	Time  string `json:"time"`
+	Count int    `json:"count"`
 }
 
 // ==============================================

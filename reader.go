@@ -124,7 +124,7 @@ func (r *Reader) Connect(ctx context.Context) error {
 
 type MessageComposeAndErr struct {
 	MessageCompose *MessageCompose `json:"messageCompose"`
-	Err            error `json:"err"`
+	Err            error           `json:"err"`
 }
 
 func (r *Reader) Query(ctx context.Context, param QueryParam) []MessageComposeAndErr {
