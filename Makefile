@@ -7,6 +7,10 @@ run-single:
 run-alpine:
 	go run . --config config-alpine.properties --debug
 
+run-alpine-problem-resolve:
+	go run . --config config-alpine-problem-resolve.properties --debug
+
+
 clean:
 	rm -rf bin
 
