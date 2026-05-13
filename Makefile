@@ -14,16 +14,20 @@ build: clean build/amd64 build/arm64 build/win build/macos
 	
 build/amd64: clean
 	@echo 'building linux_amd64...'
+	cd ui && npm run build
 	mkdir -p bin && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w" -o=bin/logs-viewer_amd64 .
 
 build/arm64:
 	@echo 'building linux_arm64...'
+	cd ui && npm run build
 	mkdir -p bin && GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w" -o=bin/logs-viewer_arm64 .
 
 build/win:
 	@echo 'building windows...'
+	cd ui && npm run build
 	mkdir -p bin && GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w" -o=bin/logs-viewer_windows_amd64 .
 
 build/macos:
-	@echo 'building windows...'
+	@echo 'building macos...'
+	cd ui && npm run build
 	mkdir -p bin && GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -ldflags="-s -w" -o=bin/logs-viewer_darwin_arm64 .	
