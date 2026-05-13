@@ -53,8 +53,8 @@ type Log struct {
 }
 
 type Stat struct {
-	Time  string `json:"time"`
-	Count int    `json:"count"`
+	Time  int64 `json:"time"`
+	Count int   `json:"count"`
 }
 
 // ==============================================
@@ -178,7 +178,7 @@ func (r *DataRet) Decode(src []byte) error {
 }
 
 type StatRet struct {
-	Time  string
+	Time  time.Time
 	Count int
 }
 
@@ -208,7 +208,10 @@ func (r *StatRet) Decode(src []byte) error {
 		return fmt.Errorf("invalid message format for StatRet, content is %s", src)
 	}
 
-	r.Time = string(src[:idx])
+	r.Time, err = time.Parse("2006-01-02 15:04", string(src[:idx]))
+	if err != nil {
+		return fmt.Errorf("invalid message format for StatRet, content is %s", src)
+	}
 	r.Count = count
 	return nil
 }

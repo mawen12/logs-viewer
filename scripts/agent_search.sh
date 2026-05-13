@@ -17,6 +17,7 @@ run_search() {
       numFilteredOut=0;
       num_bytes_to_scan='$num_bytes_to_scan';
       currentLog="";
+      # awk 中 bool 对应：false = 0; true = 1;
       isMatch = 0;
       curMinKey = "";
       print "N:max line is " maxLines
@@ -65,7 +66,7 @@ run_search() {
 
     END {
       if (isMatch) {
-        print "N:End" currentLog " is match"
+        stats[curMinKey]++;
         lastLines[curLine] = currentLog;
         lastNRs[curLine] = prevNR;
         curLine++;

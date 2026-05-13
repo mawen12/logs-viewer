@@ -19,12 +19,13 @@ type Reader struct {
 	prefixPath string
 	lines      []string
 	urls       []ParsedUrl
-	conns      []*SshConn
+	conns      []Conn
 }
 
 type ParsedUrl struct {
 	source   string
 	stream   string
+	scheme   string
 	username string
 	password string
 	host     string
@@ -38,7 +39,7 @@ func NewReader(configPath string) *Reader {
 		prefixPath: fmt.Sprintf("/tmp/%s", uuid.New().String()),
 		lines:      make([]string, 0),
 		urls:       make([]ParsedUrl, 0),
-		conns:      make([]*SshConn, 0),
+		conns:      make([]Conn, 0),
 	}
 }
 
@@ -90,6 +91,7 @@ func parse(line string) (ParsedUrl, error) {
 	return ParsedUrl{
 		source:   line,
 		stream:   fmt.Sprintf("%s:%s", u.Hostname(), u.Path),
+		scheme:   u.Scheme,
 		username: u.User.Username(),
 		password: password,
 		host:     u.Hostname(),
@@ -104,12 +106,22 @@ func (r *Reader) Connect(ctx context.Context) error {
 	}
 
 	for _, url := range r.urls {
-		conn, err := NewSshConn(r.prefixPath, url)
-		if err != nil {
-			return err
-		}
+		switch url.scheme {
+		case "cmd":
+			conn, err := NewCmdConn(r.prefixPath, url)
+			if err != nil {
+				return err
+			}
+			r.conns = append(r.conns, conn)
+		case "ssh":
+			conn, err := NewSshConn(r.prefixPath, url)
+			if err != nil {
+				return err
+			}
+			r.conns = append(r.conns, conn)
+		default:
 
-		r.conns = append(r.conns, conn)
+		}
 	}
 
 	for _, conn := range r.conns {
@@ -122,14 +134,8 @@ func (r *Reader) Connect(ctx context.Context) error {
 	return nil
 }
 
-// type MessageComposeAndErr struct {
-// 	Stream         string          `json:"stream"`
-// 	MessageCompose *MessageCompose `json:"messageCompose"`
-// 	Err            error           `json:"err"`
-// }
-
 func (r *Reader) Query(ctx context.Context, param QueryParam) []MessageCompose {
-	execute := func(ctx context.Context, c *SshConn) (*MessageCompose, error) {
+	execute := func(ctx context.Context, c Conn) (*MessageCompose, error) {
 		return c.Query(ctx, param)
 	}
 
@@ -137,13 +143,13 @@ func (r *Reader) Query(ctx context.Context, param QueryParam) []MessageCompose {
 }
 
 func (r *Reader) Clean(ctx context.Context) []MessageCompose {
-	execute := func(ctx context.Context, c *SshConn) (*MessageCompose, error) {
+	execute := func(ctx context.Context, c Conn) (*MessageCompose, error) {
 		return c.Clean(ctx)
 	}
 	return r.parallelExecute(ctx, execute)
 }
 
-type executer func(ctx context.Context, c *SshConn) (*MessageCompose, error)
+type executer func(ctx context.Context, c Conn) (*MessageCompose, error)
 
 func (r *Reader) parallelExecute(ctx context.Context, execute executer) []MessageCompose {
 	retChan := make(chan MessageCompose, len(r.conns))
@@ -160,7 +166,7 @@ func (r *Reader) parallelExecute(ctx context.Context, execute executer) []Messag
 					Errs: []error{err},
 				}
 			}
-			msg.Stream = conn.url.stream
+			msg.Stream = conn.Url().stream
 			retChan <- *msg
 		}()
 	}

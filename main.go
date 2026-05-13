@@ -83,11 +83,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// from, err := time.Parse("2006-01-02-15:04", "2026-05-13 11:47")
+	// from, err := time.Parse("2006-01-02-15:04", "2026-05-13-11:47")
 	// if err != nil {
 	// 	panic(err)
 	// }
-	// to, err := time.Parse("2006-01-02-15:04", "2026-05-13 12:47")
+	// to, err := time.Parse("2006-01-02-15:04", "2026-05-13-12:47")
 	// if err != nil {
 	// 	panic(err)
 	// }

@@ -21,6 +21,18 @@
                 "--config",
                 "config-alpine.properties"
             ]
+        },
+
+        {
+            "name": "local",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}",
+            "args": [
+                "--config",
+                "config-local.properties"
+            ]
         }
     ]
 }

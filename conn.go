@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"os/exec"
 	"strings"
 	"text/template"
 	"time"
@@ -38,17 +39,9 @@ type SshConnConfig struct {
 }
 
 type SshConn struct {
-	prefixPath string
-	url        ParsedUrl
-
+	*CommonConn
 	client  *ssh.Client
 	session *ssh.Session
-
-	stdin                io.WriteCloser
-	stdout, stderr       io.Reader
-	stdoutBuf, stderrBuf *bufio.Reader
-
-	exts map[string]string
 }
 
 func NewSshConn(pathPrefix string, url ParsedUrl) (*SshConn, error) {
@@ -88,24 +81,111 @@ func NewSshConn(pathPrefix string, url ParsedUrl) (*SshConn, error) {
 		return nil, err
 	}
 
+	return &SshConn{
+		CommonConn: NewCommonConn(pathPrefix, url, stdin, stdout, stderr),
+		client:     client,
+		session:    session,
+	}, nil
+}
+
+func shellQuote(s string) string {
+	return fmt.Sprintf("'%s'", strings.Replace(s, "'", "'\"'\"'", -1))
+}
+
+func (conn *SshConn) Close() {
+	conn.session.Close()
+	conn.client.Close()
+}
+
+type CmdConn struct {
+	*CommonConn
+	cmd            *exec.Cmd
+	stdout, stderr io.ReadCloser
+}
+
+func NewCmdConn(prefixPath string, url ParsedUrl) (*CmdConn, error) {
+	cmd := exec.Command("/bin/sh")
+
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := cmd.Start(); err != nil {
+		return nil, err
+	}
+
+	return &CmdConn{
+		CommonConn: NewCommonConn(prefixPath, url, stdin, stdout, stderr),
+		cmd:        cmd,
+	}, nil
+}
+
+func (conn *CmdConn) Close() {
+	if conn.stdin != nil {
+		conn.stdin.Close()
+	}
+	if conn.stdout != nil {
+		conn.stdout.Close()
+	}
+	if conn.stderr != nil {
+		conn.stderr.Close()
+	}
+	if conn.cmd != nil {
+		conn.cmd.Wait()
+	}
+}
+
+type Conn interface {
+	Url() ParsedUrl
+	Start(context.Context) (*MessageCompose, error)
+	Query(context.Context, QueryParam) (*MessageCompose, error)
+	Clean(context.Context) (*MessageCompose, error)
+	Close()
+}
+
+type CommonConn struct {
+	prefixPath string
+	url        ParsedUrl
+
+	stdin                io.WriteCloser
+	stdout, stderr       io.Reader
+	stdoutBuf, stderrBuf *bufio.Reader
+
+	exts map[string]string
+}
+
+func NewCommonConn(prefixPath string, url ParsedUrl, stdin io.WriteCloser, stdout, stderr io.Reader) *CommonConn {
 	stdoutBuf := bufio.NewReader(stdout)
 	stderrBuf := bufio.NewReader(stderr)
 
-	return &SshConn{
-		prefixPath: pathPrefix,
+	return &CommonConn{
+		prefixPath: prefixPath,
 		url:        url,
-		client:     client,
-		session:    session,
 		stdin:      stdin,
 		stdout:     stdout,
 		stderr:     stderr,
 		stdoutBuf:  stdoutBuf,
 		stderrBuf:  stderrBuf,
 		exts:       make(map[string]string),
-	}, nil
+	}
 }
 
-func (conn *SshConn) Start(ctx context.Context) (*MessageCompose, error) {
+func (conn *CommonConn) Url() ParsedUrl {
+	return conn.url
+}
+
+func (conn *CommonConn) Start(ctx context.Context) (*MessageCompose, error) {
 	params := map[string]any{
 		"PrefixPath":    conn.prefixPath,
 		"AgentPath":     "agent.sh",
@@ -130,7 +210,7 @@ func (conn *SshConn) Start(ctx context.Context) (*MessageCompose, error) {
 	return conn.receive(ctx)
 }
 
-func (conn *SshConn) Query(ctx context.Context, param QueryParam) (*MessageCompose, error) {
+func (conn *CommonConn) Query(ctx context.Context, param QueryParam) (*MessageCompose, error) {
 	params := map[string]any{
 		"AgentPath":   fmt.Sprintf("%s/%s", conn.prefixPath, "agent.sh"),
 		"IndexFile":   fmt.Sprintf("%s/%s", conn.prefixPath, "index.log"),
@@ -155,11 +235,7 @@ func (conn *SshConn) Query(ctx context.Context, param QueryParam) (*MessageCompo
 	return conn.receive(ctx)
 }
 
-func shellQuote(s string) string {
-	return fmt.Sprintf("'%s'", strings.Replace(s, "'", "'\"'\"'", -1))
-}
-
-func (conn *SshConn) Clean(ctx context.Context) (*MessageCompose, error) {
+func (conn *CommonConn) Clean(ctx context.Context) (*MessageCompose, error) {
 	params := map[string]any{
 		"PrefixPath": conn.prefixPath,
 	}
@@ -175,7 +251,7 @@ func (conn *SshConn) Clean(ctx context.Context) (*MessageCompose, error) {
 	return conn.receive(ctx)
 }
 
-func (conn *SshConn) template(tmpl string, params map[string]any) ([]byte, error) {
+func (conn *CommonConn) template(tmpl string, params map[string]any) ([]byte, error) {
 	t := template.Must(template.New("bootstrap").Parse(tmpl))
 	var buf bytes.Buffer
 
@@ -192,7 +268,7 @@ func (conn *SshConn) template(tmpl string, params map[string]any) ([]byte, error
 	return bs, nil
 }
 
-func (conn *SshConn) receive(ctx context.Context) (*MessageCompose, error) {
+func (conn *CommonConn) receive(ctx context.Context) (*MessageCompose, error) {
 	var stdoutEnd, stderrEnd bool
 	messageCompose := &MessageCompose{}
 
@@ -225,7 +301,7 @@ Loop:
 				})
 			case *StatRet:
 				messageCompose.Stats = append(messageCompose.Stats, Stat{
-					Time:  ret.Time,
+					Time:  ret.Time.Unix(),
 					Count: ret.Count,
 				})
 			case *ExtRet:
@@ -281,7 +357,7 @@ type RetAndErr struct {
 	Err error
 }
 
-func (conn *SshConn) StdoutReceive(ctx context.Context) chan RetAndErr {
+func (conn *CommonConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 	retChan := make(chan RetAndErr, 10)
 
 	go func() {
@@ -342,7 +418,7 @@ func (conn *SshConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 	return retChan
 }
 
-func (conn *SshConn) StderrReceive(ctx context.Context) chan RetAndErr {
+func (conn *CommonConn) StderrReceive(ctx context.Context) chan RetAndErr {
 	retChan := make(chan RetAndErr, 10)
 
 	go func() {
@@ -394,9 +470,4 @@ func (conn *SshConn) StderrReceive(ctx context.Context) chan RetAndErr {
 	}()
 
 	return retChan
-}
-
-func (conn *SshConn) Close() {
-	conn.session.Close()
-	conn.client.Close()
 }

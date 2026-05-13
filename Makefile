@@ -10,6 +10,9 @@ run-alpine:
 run-alpine-problem-resolve:
 	go run . --config config-alpine-problem-resolve.properties --debug
 
+run-local:
+	go run . --config config-local.properties
+
 
 clean:
 	rm -rf bin
