@@ -122,12 +122,13 @@ func (r *Reader) Connect(ctx context.Context) error {
 	return nil
 }
 
-type MessageComposeAndErr struct {
-	MessageCompose *MessageCompose `json:"messageCompose"`
-	Err            error           `json:"err"`
-}
+// type MessageComposeAndErr struct {
+// 	Stream         string          `json:"stream"`
+// 	MessageCompose *MessageCompose `json:"messageCompose"`
+// 	Err            error           `json:"err"`
+// }
 
-func (r *Reader) Query(ctx context.Context, param QueryParam) []MessageComposeAndErr {
+func (r *Reader) Query(ctx context.Context, param QueryParam) []MessageCompose {
 	execute := func(ctx context.Context, c *SshConn) (*MessageCompose, error) {
 		return c.Query(ctx, param)
 	}
@@ -135,7 +136,7 @@ func (r *Reader) Query(ctx context.Context, param QueryParam) []MessageComposeAn
 	return r.parallelExecute(ctx, execute)
 }
 
-func (r *Reader) Clean(ctx context.Context) []MessageComposeAndErr {
+func (r *Reader) Clean(ctx context.Context) []MessageCompose {
 	execute := func(ctx context.Context, c *SshConn) (*MessageCompose, error) {
 		return c.Clean(ctx)
 	}
@@ -144,8 +145,8 @@ func (r *Reader) Clean(ctx context.Context) []MessageComposeAndErr {
 
 type executer func(ctx context.Context, c *SshConn) (*MessageCompose, error)
 
-func (r *Reader) parallelExecute(ctx context.Context, execute executer) []MessageComposeAndErr {
-	retChan := make(chan MessageComposeAndErr, len(r.conns))
+func (r *Reader) parallelExecute(ctx context.Context, execute executer) []MessageCompose {
+	retChan := make(chan MessageCompose, len(r.conns))
 	wg := sync.WaitGroup{}
 	wg.Add(len(r.conns))
 
@@ -154,10 +155,13 @@ func (r *Reader) parallelExecute(ctx context.Context, execute executer) []Messag
 			defer wg.Done()
 
 			msg, err := execute(ctx, conn)
-			retChan <- MessageComposeAndErr{
-				MessageCompose: msg,
-				Err:            err,
+			if err != nil {
+				msg = &MessageCompose{
+					Errs: []error{err},
+				}
 			}
+			msg.Stream = conn.url.stream
+			retChan <- *msg
 		}()
 	}
 
@@ -166,7 +170,7 @@ func (r *Reader) parallelExecute(ctx context.Context, execute executer) []Messag
 		close(retChan)
 	}()
 
-	rets := make([]MessageComposeAndErr, 0)
+	rets := make([]MessageCompose, 0)
 	for ret := range retChan {
 		rets = append(rets, ret)
 	}

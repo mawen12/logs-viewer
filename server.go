@@ -91,8 +91,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("param ", param.String())
 
-	ctx := context.Background()
-	rets := reader.Query(ctx, param)
+	rets := reader.Query(r.Context(), param)
 
 	writeJson(w, r, rets)
 }

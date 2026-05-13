@@ -219,7 +219,7 @@ Loop:
 				messageCompose.Errs = append(messageCompose.Errs, errors.New(ret.Message))
 			case *DataRet:
 				messageCompose.Logs = append(messageCompose.Logs, Log{
-					Stream:  conn.url.stream,
+					// Stream:  conn.url.stream,
 					Num:     ret.CurNR,
 					Message: ret.Message,
 				})

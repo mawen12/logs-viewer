@@ -40,13 +40,14 @@ func (param QueryParam) String() string {
 }
 
 type MessageCompose struct {
-	Logs  []Log   `json:"logs"`
-	Stats []Stat  `json:"stats"`
-	Errs  []error `json:"errs"`
+	Stream string  `json:"stream"`
+	Logs   []Log   `json:"logs"`
+	Stats  []Stat  `json:"stats"`
+	Errs   []error `json:"errs"`
 }
 
 type Log struct {
-	Stream  string `json:"stream"`
+	// Stream  string `json:"stream"`
 	Num     int    `json:"num"`
 	Message string `json:"message"`
 }
