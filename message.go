@@ -20,14 +20,14 @@ func (param QueryParam) FromStr() string {
 	if param.From.IsZero() {
 		return ""
 	}
-	return param.From.Format("2006-01-02 15:04:05")
+	return param.From.Format("2006-01-02-15:04")
 }
 
 func (param QueryParam) ToStr() string {
 	if param.To.IsZero() {
 		return ""
 	}
-	return param.To.Format("2006-01-02 15:04:05")
+	return param.To.Format("2006-01-02-15:04")
 }
 
 func (param QueryParam) String() string {

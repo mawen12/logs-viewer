@@ -11,10 +11,15 @@ import (
 	"time"
 )
 
-func server(port uint32) error {
+type serverConfig struct {
+	port    uint32
+	timeout time.Duration
+}
+
+func server(config serverConfig) error {
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
-		Handler: routes(),
+		Addr:    fmt.Sprintf(":%d", config.port),
+		Handler: routes(config),
 		// ErrorLog: "",
 	}
 
@@ -24,7 +29,7 @@ func server(port uint32) error {
 	return srv.ListenAndServe()
 }
 
-func routes() http.Handler {
+func routes(config serverConfig) http.Handler {
 	mux := &http.ServeMux{}
 
 	mux.HandleFunc("GET /query", query)
@@ -112,7 +117,8 @@ func readTime(qs url.Values, key string, defaultTime time.Time) time.Time {
 		return defaultTime
 	}
 
-	t, err := time.Parse("2006-01-02 15:04:05", s)
+	// because index.log use this format: 2006-01-02-15:04
+	t, err := time.Parse("2006-01-02-15:04", s)
 	if err != nil {
 		return defaultTime
 	}

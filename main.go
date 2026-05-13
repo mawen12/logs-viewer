@@ -76,12 +76,26 @@ func main() {
 
 	log.Println("Connect success")
 
-	if err := server(uint32(*port)); err != nil {
+	config := serverConfig{
+		port: uint32(*port),
+	}
+	if err := server(config); err != nil {
 		log.Fatal(err)
 	}
 
+	// from, err := time.Parse("2006-01-02-15:04", "2026-05-13 11:47")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// to, err := time.Parse("2006-01-02-15:04", "2026-05-13 12:47")
+	// if err != nil {
+	// 	panic(err)
+	// }
+
 	// param := QueryParam{
 	// 	Pattern:     "/INFO/",
+	// 	From:        from,
+	// 	To:          to,
 	// 	MaxNumLines: 1,
 	// }
 	// rets := reader.Query(ctx, param)

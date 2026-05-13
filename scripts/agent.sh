@@ -23,27 +23,31 @@ concat_cmds_array() {
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    -c|--index-file) # 对日志进行解析生成的索引文件，保存了日志中的分钟，及该分钟的记录数和字节数
+    # 对日志进行解析生成的索引文件，保存了日志中的分钟，及该分钟的记录数和字节数
+    -c|--index-file) 
       indexfile="$2"
       shift
       shift
       ;; 
-    --logfile) # 待检索的日志名称
+    # 待检索的日志名称  
+    --logfile) 
       logfile="$2"
       shift
       shift
       ;;
-    -f|--from) # 待检索的开始时间
+    # 待检索的开始时间  
+    -f|--from) 
       from="$2"
       shift
       shift
       ;;
-    -t|--to) # 待检索的结束时间
+    # 待检索的结束时间  
+    -t|--to) 
       to="$2"
       shift
       shift
       ;;
-    -u|--lines-until) # 
+    -u|--lines-until) 
       lines_until="$2"
       shift
       shift
