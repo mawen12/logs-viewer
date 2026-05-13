@@ -8,10 +8,8 @@ type CardLogsProps = {
 }
 
 export function CardLogs({ logs }: CardLogsProps) {
-    // const { logs } = useLogsState();
-
     return (
-        <ScrollArea className="h-full flex flex-col gap-1 border rounded-md p-1">
+        <ScrollArea className="h-full min-h-0 flex flex-col gap-1 border rounded-md p-1">
             {logs && logs.map((log) => (
                 <>
                     <CardLog key={log.num} {...log} />

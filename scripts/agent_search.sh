@@ -28,6 +28,14 @@ run_search() {
       printPercentage(byteNr, num_bytes_to_scan)
     }
 
+    {
+      if (!validPrefix()) {
+        if (currentLog != "") {
+          currentLog = sprintf("%s%c%s", currentLog, 0, $0);
+        }
+      }
+    }
+
     '$awk_pattern'
 
     '$lines_util_check'
@@ -53,10 +61,11 @@ run_search() {
         curMinKey = substr($0, 1, 16);
         # print "N:current min key is " curMinKey 
         stats[curMinKey]++;
-      } else {
-        # 续行：追加到当前日志，用空格分离
-        currentLog = sprintf("%s%c%s", currentLog, 0, $0);
       }
+      # else {
+        # 续行：追加到当前日志，用空格分离
+      #  currentLog = sprintf("%s%c%s", currentLog, 0, $0);
+      #}
     }
 
     END {

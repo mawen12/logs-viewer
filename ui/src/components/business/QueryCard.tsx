@@ -58,18 +58,20 @@ export function QueryCard() {
             <CardContent>
                 <div className="flex flex-col gap-2">
                     <div className="flex flex-row gap-2">
-                        {/* <Input placeholder="Query" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={handleKeyDown} /> */}
-
                         <div className="relative w-full">
                             <Input value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={handleKeyDown} />
-                            <Label className="absolute top-[-10px] left-[6px] px-1 text-muted-foreground bg-background dark:bg-tranparent text-xs pointer-events-none">
+                            <Label className="absolute top-[-10px] left-[6px] px-1 text-muted-foreground dark:bg-tranparent text-xs pointer-events-none" style={{
+                                backgroundColor: 'var(--bg)',
+                            }}>
                                 Query
                             </Label>
                         </div>
 
                         <div className="relative w-48">
                             <Input value={limit} onChange={(e) => setLimit(Number(e.target.value))} onKeyDown={handleKeyDown} />
-                            <Label className="absolute top-[-10px] left-[6px] px-1 text-muted-foreground bg-background text-xs pointer-events-none">
+                            <Label className="absolute top-[-10px] left-[6px] px-1 text-muted-foreground text-xs pointer-events-none" style={{
+                                backgroundColor: 'var(--bg)',
+                            }}>
                                 Limit
                             </Label>
                         </div>
