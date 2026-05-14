@@ -33,6 +33,24 @@ type ParsedUrl struct {
 	log      string
 }
 
+func (url ParsedUrl) LogName() string {
+	if url.log == "" {
+		return ""
+	}
+
+	lastSlash := strings.LastIndexByte(url.log, '/')
+	if lastSlash == -1 {
+		return url.log
+	}
+
+	lastPoint := strings.LastIndexByte(url.log, '.')
+	if lastPoint == -1 {
+		lastPoint = -1
+	}
+
+	return url.log[lastSlash+1 : lastPoint]
+}
+
 func NewReader(configPath string) *Reader {
 	return &Reader{
 		configPath: configPath,
@@ -120,7 +138,7 @@ func (r *Reader) Connect(ctx context.Context) error {
 			}
 			r.conns = append(r.conns, conn)
 		default:
-
+			// todo
 		}
 	}
 
@@ -130,7 +148,7 @@ func (r *Reader) Connect(ctx context.Context) error {
 			return err
 		}
 		log.Println("connect msg", msg)
-	}
+			}
 	return nil
 }
 

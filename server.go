@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"time"
 
@@ -84,6 +85,11 @@ func crossOrigin(next http.Handler) http.Handler {
 	})
 }
 
+type QueryResponse struct {
+	MessageComposes []MessageCompose `json:"messageComposes"`
+	Stats           []Stat           `json:"stats"`
+}
+
 func query(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
@@ -96,9 +102,37 @@ func query(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("param ", param.String())
 
-	rets := reader.Query(r.Context(), param)
+	queryResults := reader.Query(r.Context(), param)
+	statsMap := make(map[int64]Stat, 0)
+	for _, queryResult := range queryResults {
+		for _, stat := range queryResult.Stats {
+			v, ok := statsMap[stat.Time]
+			if ok {
+				v.Count += stat.Count
+			} else {
+				statsMap[stat.Time] = stat
+			}
+		}
+	}
 
-	writeJson(w, r, rets)
+	keys := make([]int64, 0, len(statsMap))
+	for k := range statsMap {
+		keys = append(keys, k)
+	}
+
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+
+	sortedStats := make([]Stat, 0, len(statsMap))
+	for _, k := range keys {
+		sortedStats = append(sortedStats, statsMap[k])
+	}
+
+	writeJson(w, r, QueryResponse{
+		Stats:           sortedStats,
+		MessageComposes: queryResults,
+	})
 }
 
 func readInt(qs url.Values, key string, defaultValue int) int {

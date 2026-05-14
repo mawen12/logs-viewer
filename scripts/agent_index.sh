@@ -8,10 +8,14 @@ run_awk_index_script () {
       } else {
         lastHHMM = ""
       }
+
+      print "N:awk_index:lastHHMM is " lastHHMM
       
       bytenr_next = 1;
       lastPercent = 0;
       size_to_index = '$((total_size-last_bytenr))';
+
+      print "N:awk_index:size to index is " size_to_index
     }
 
     {
@@ -44,6 +48,7 @@ run_awk_index_script () {
 
 build_index() {
   if [[ "$refresh_index" == "1" ]]; then
+    echo "N:detect refresh index then remove $indexfile"
     rm -f $indexfile || exit 1
   fi
 

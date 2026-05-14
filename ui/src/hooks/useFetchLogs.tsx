@@ -7,7 +7,7 @@ import { useCallback, useState } from "react";
 export const useFetchLogs = () => {
     const { serverUrl } = useAppState();
 
-    const {setLogs, setLoading, setDurationMs, setMessageComposes} = useLogsState()
+    const {setLogs, setLoading, setDurationMs, setMessageComposes, setStats} = useLogsState()
     const [error, setError] = useState<string>();
 
     const fetchLogs = useCallback(async (params: FetchLogsParams) => {
@@ -22,13 +22,15 @@ export const useFetchLogs = () => {
                 setLogs([]);
                 return false;
             }
-            setMessageComposes(data)
+            setMessageComposes(data.messageComposes);
+            setStats(data.stats)
             const duration = response.headers.get("Logs-Viewer-Cost-Ms");
             setDurationMs(duration ? Number(duration) : undefined);
         } catch (e) {
             console.error(e);
             setError(String(e));
             setMessageComposes([]);
+            setStats([]);
             return false;
         } finally {
             setLoading(false);

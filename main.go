@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 var (
@@ -23,18 +25,21 @@ var (
 
 func main() {
 	defer func() {
-		if file != nil {
-			file.Close()
-		}
+		fmt.Println("defer close reader and file")
 
 		if reader != nil {
+			reader.Clean(context.Background())
 			reader.Close()
+		}
+
+		if file != nil {
+			file.Close()
 		}
 	}()
 
 	flag.Parse()
 
-	if configPath == nil {
+	if *configPath == "" {
 		panic("config file must provided")
 	}
 
@@ -79,9 +84,17 @@ func main() {
 	config := serverConfig{
 		port: uint32(*port),
 	}
-	if err := server(config); err != nil {
-		log.Fatal(err)
-	}
+
+	go func() {
+		if err := server(config); err != nil {
+			fmt.Println("Cann't start server:", err)
+			os.Exit(1)
+		}
+	}()
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	<-c
 
 	// from, err := time.Parse("2006-01-02-15:04", "2026-05-13-11:47")
 	// if err != nil {

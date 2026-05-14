@@ -254,6 +254,8 @@ else
   num_bytes_to_scan=$((to_bytenr-from_bytenr))  
 fi
 
+echo "N:from_bytenr:$from_bytenr, to_bytenr:$to_bytenr"
+
 declare -a cmds
 if [[ "$from_bytenr" != "" ]]; then
   if [[ "$to_bytenr" != "" ]]; then

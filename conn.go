@@ -156,6 +156,7 @@ type Conn interface {
 
 type CommonConn struct {
 	prefixPath string
+	indexFile  string
 	url        ParsedUrl
 
 	stdin                io.WriteCloser
@@ -171,6 +172,7 @@ func NewCommonConn(prefixPath string, url ParsedUrl, stdin io.WriteCloser, stdou
 
 	return &CommonConn{
 		prefixPath: prefixPath,
+		indexFile:  fmt.Sprintf("%s-index.log", url.LogName()),
 		url:        url,
 		stdin:      stdin,
 		stdout:     stdout,
@@ -196,7 +198,7 @@ func (conn *CommonConn) Start(ctx context.Context) (*MessageCompose, error) {
 		"IndexContent":  indexSh,
 		"SearchPath":    "agent_search.sh",
 		"SearchContent": searchSh,
-		"IndexFile":     "index.log",
+		"IndexFile":     conn.indexFile,
 		"LogFile":       conn.url.log,
 	}
 	bs, err := conn.template(startShTemplate, params)
@@ -213,7 +215,7 @@ func (conn *CommonConn) Start(ctx context.Context) (*MessageCompose, error) {
 func (conn *CommonConn) Query(ctx context.Context, param QueryParam) (*MessageCompose, error) {
 	params := map[string]any{
 		"AgentPath":   fmt.Sprintf("%s/%s", conn.prefixPath, "agent.sh"),
-		"IndexFile":   fmt.Sprintf("%s/%s", conn.prefixPath, "index.log"),
+		"IndexFile":   fmt.Sprintf("%s/%s", conn.prefixPath, conn.indexFile),
 		"MaxNumLines": param.MaxNumLines,
 		"LogFile":     conn.url.log,
 		"FromExists":  param.FromStr() != "",

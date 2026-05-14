@@ -5,14 +5,19 @@ export interface Log {
 }
 
 export interface Stat {
-    time: string,
+    time: number,
     count: number,
 }
 
 export interface MessageCompose {
-    logs: Log[]
-    stats: Stat[]
+    logs: Log[],
+    stats: Stat[],
     stream: string,
+}
+
+export interface QueryResponse {
+    messageComposes: MessageCompose[],
+    stats: Stat[],
 }
 
 export interface FetchLogsParams {
