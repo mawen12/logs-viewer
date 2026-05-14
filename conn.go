@@ -270,6 +270,16 @@ func (conn *CommonConn) template(tmpl string, params map[string]any) ([]byte, er
 	return bs, nil
 }
 
+func extractTime(message string) int64 {
+	timeStr := message[:23]
+	t, err := time.Parse(LayoutDateTimeMillisecondComma, timeStr)
+	if err != nil {
+		return -1
+	}
+
+	return t.UnixNano() / int64(time.Millisecond)
+}
+
 func (conn *CommonConn) receive(ctx context.Context) (*MessageCompose, error) {
 	var stdoutEnd, stderrEnd bool
 	messageCompose := &MessageCompose{}
@@ -297,7 +307,7 @@ Loop:
 				messageCompose.Errs = append(messageCompose.Errs, errors.New(ret.Message))
 			case *DataRet:
 				messageCompose.Logs = append(messageCompose.Logs, Log{
-					// Stream:  conn.url.stream,
+					Time:    extractTime(ret.Message),
 					Num:     ret.CurNR,
 					Message: ret.Message,
 				})

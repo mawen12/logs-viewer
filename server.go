@@ -156,7 +156,7 @@ func readTime(qs url.Values, key string, defaultTime time.Time) time.Time {
 	}
 
 	// because index.log use this format: 2006-01-02-15:04
-	t, err := time.Parse("2006-01-02-15:04", s)
+	t, err := time.Parse(LayoutDateTimeMinuteDash, s)
 	if err != nil {
 		return defaultTime
 	}

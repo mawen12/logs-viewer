@@ -20,14 +20,14 @@ func (param QueryParam) FromStr() string {
 	if param.From.IsZero() {
 		return ""
 	}
-	return param.From.Format("2006-01-02-15:04")
+	return param.From.Format(LayoutDateTimeMinuteDash)
 }
 
 func (param QueryParam) ToStr() string {
 	if param.To.IsZero() {
 		return ""
 	}
-	return param.To.Format("2006-01-02-15:04")
+	return param.To.Format(LayoutDateTimeMinuteDash)
 }
 
 func (param QueryParam) String() string {
@@ -47,7 +47,7 @@ type MessageCompose struct {
 }
 
 type Log struct {
-	// Stream  string `json:"stream"`
+	Time    int64  `json:"time"`
 	Num     int    `json:"num"`
 	Message string `json:"message"`
 }
