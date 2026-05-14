@@ -35,10 +35,9 @@ func server(config serverConfig) error {
 func routes(config serverConfig) http.Handler {
 	mux := &http.ServeMux{}
 
-	mux.HandleFunc("GET /", ui.GetHandler().ServeHTTP)
-	mux.HandleFunc("GET /static/*path", http.StripPrefix("static", ui.GetHandler()).ServeHTTP)
-	mux.HandleFunc("GET /favicon.svg", ui.GetHandler().ServeHTTP)
-	mux.HandleFunc("GET /query", query)
+	// Keep routes compatible with Go 1.20 ServeMux syntax.
+	mux.HandleFunc("/", ui.GetHandler().ServeHTTP)
+	mux.HandleFunc("/query", query)
 
 	return recoverPanic(logRequest(crossOrigin(mux)))
 }
