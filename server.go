@@ -103,14 +103,14 @@ func query(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("param ", param.String())
 
 	queryResults := reader.Query(r.Context(), param)
-	statsMap := make(map[int64]Stat, 0)
+	statsMap := make(map[int64]int, 0)
 	for _, queryResult := range queryResults {
 		for _, stat := range queryResult.Stats {
-			v, ok := statsMap[stat.Time]
+			_, ok := statsMap[stat.Time]
 			if ok {
-				v.Count += stat.Count
+				statsMap[stat.Time] += stat.Count
 			} else {
-				statsMap[stat.Time] = stat
+				statsMap[stat.Time] = stat.Count
 			}
 		}
 	}
@@ -126,7 +126,10 @@ func query(w http.ResponseWriter, r *http.Request) {
 
 	sortedStats := make([]Stat, 0, len(statsMap))
 	for _, k := range keys {
-		sortedStats = append(sortedStats, statsMap[k])
+		sortedStats = append(sortedStats, Stat{
+			Time:  k,
+			Count: statsMap[k],
+		})
 	}
 
 	writeJson(w, r, QueryResponse{

@@ -93,8 +93,9 @@ func main() {
 	}()
 
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	<-c
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	notify := <-c
+	fmt.Println("receive signal ", notify)
 
 	// from, err := time.Parse(LayoutDateTimeMinuteDash, "2026-05-13-11:47")
 	// if err != nil {

@@ -18,11 +18,15 @@ export function QueryCard() {
     const { query, setQuery, limit, setLimit } = useQueryState()
 
     const { fetchLogs, } = useFetchLogs();
-    const { loading, durationMs, messageComposes } = useLogsState()
+    const { loading, durationMs, messageComposes, stats } = useLogsState()
 
-    const total = useMemo(() => {
+    const fetchedCount = useMemo(() => {
         return messageComposes.reduce((sum, mc) => sum + (mc.logs?.length || 0), 0)
     }, [messageComposes])
+
+    const matchedCount = useMemo(() => {
+        return stats.reduce((sum, s) => sum + s.count, 0)
+    }, [stats])
 
     const getParams = (): FetchLogsParams => {
         let fromStr = "", toStr = "";
@@ -79,7 +83,8 @@ export function QueryCard() {
 
                     <div className="flex flex-row items-center gap-2">
                         {durationMs && <Badge variant={"outline"} className="text-gray-500" >Query: {durationMs}ms</Badge>}
-                        <Badge variant={"outline"} className="text-gray-500">Count: {total}</Badge>
+                        <Badge variant={"outline"} className="text-gray-500">Fetched Count: {fetchedCount}</Badge>
+                        <Badge variant={"outline"} className="text-gray-500">Matched Count: {matchedCount}</Badge>
 
                         <div className="ml-auto">
                             <Button variant="outline" onClick={handleQuery} disabled={loading}>

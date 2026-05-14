@@ -7,20 +7,27 @@ type AppStateProvidderProps = {
 
 type AppStateProviderState = {
     serverUrl: string,
+    direction: "line" | "tabs",
+    setDirection: (direciton: "line" | "tabs") => void,
 }
 
 const initialState:AppStateProviderState = {
     serverUrl: getDefaultServer(),
+    direction: "tabs",
+    setDirection: () => {},
 }
 
 const AppStateProviderContext = createContext<AppStateProviderState>(initialState)
 
-export function AppStateProdiver({children}: AppStateProvidderProps) {
+export function AppStateProvider({children}: AppStateProvidderProps) {
     // @ts-expect-error TODO: fix this
     const [serverUrl, setServerUrl] = useState(getDefaultServer())
+    const [direction, setDirection] = useState<"line" | "tabs">("tabs")
 
     const value = {
-        serverUrl
+        serverUrl,
+        direction,
+        setDirection,
     }
 
     return (
