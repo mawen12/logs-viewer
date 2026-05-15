@@ -9,7 +9,7 @@ function App() {
   return (
     <ThemeProvider>
       <TooltipProvider>
-        <div className="h-screen overflow-hidden flex flex-col">
+        <div className="h-screen overflow-auto flex flex-col">
           <Header />
           <Main />
         </div>

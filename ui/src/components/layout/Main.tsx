@@ -1,15 +1,14 @@
 import { ChartCard } from "../business/ChartCard";
-import { LogsCard } from "../business/LogsCard";
 import { QueryCard } from "../business/QueryCard";
+import { StickyLogsCard } from "../business/StickyLogsCard";
 
 export function Main() {
 
     return (
-        <main className="flex-1 min-h-0 overflow-hidden p-2 flex flex-col gap-2">
+        <main className="flex-1 min-h-0 p-2 flex flex-col gap-2">
             <QueryCard/>
             <ChartCard/>
-            {/* <LogsTabs/> */}
-            <LogsCard/>
+            <StickyLogsCard/>
         </main>
     )
 }

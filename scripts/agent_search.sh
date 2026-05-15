@@ -29,9 +29,7 @@ run_search() {
       bytenr += length($0) + 1;
 
       if (validPrefix()) {
-        print "N:" $0 " is valid prefix"
         if (isMatch) {
-          print "N:" currentLog " is match"
           stats[curMinKey]++;
           lastLines[curLine] = currentLog;
           lastNRs[curLine] = prevNR;
@@ -78,9 +76,9 @@ run_search() {
         print "T:" x ":" stats[x]
       }
 
-      for (x in lastLines) {
-        print "N:" x ":" lastNRs[x] ":" lastLines[x]
-      }
+      #for (x in lastLines) {
+      #  print "N:" x ":" lastNRs[x] ":" lastLines[x]
+      #}
 
       for (i = 0; i < maxLines; i++) {
         # 从当前位置读取值，如果超过 maxLines 则回绕到开头。这样确保在限制maxLines时，只返回最新的日志行。

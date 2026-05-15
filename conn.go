@@ -214,17 +214,18 @@ func (conn *CommonConn) Start(ctx context.Context) (*MessageCompose, error) {
 
 func (conn *CommonConn) Query(ctx context.Context, param QueryParam) (*MessageCompose, error) {
 	params := map[string]any{
-		"AgentPath":   fmt.Sprintf("%s/%s", conn.prefixPath, "agent.sh"),
-		"IndexFile":   fmt.Sprintf("%s/%s", conn.prefixPath, conn.indexFile),
-		"MaxNumLines": param.MaxNumLines,
-		"LogFile":     conn.url.log,
-		"FromExists":  param.FromStr() != "",
-		"From":        shellQuote(param.FromStr()),
-		"ToExists":    param.ToStr() != "",
-		"To":          shellQuote(param.ToStr()),
-		"Pattern":     shellQuote(param.Pattern),
-		"HasLineUtil": param.LineUtil != 0,
-		"LineUtil":    param.LineUtil,
+		"AgentPath":    fmt.Sprintf("%s/%s", conn.prefixPath, "agent.sh"),
+		"IndexFile":    fmt.Sprintf("%s/%s", conn.prefixPath, conn.indexFile),
+		"RefreshIndex": param.Refresh,
+		"MaxNumLines":  param.MaxNumLines,
+		"LogFile":      conn.url.log,
+		"FromExists":   param.FromStr() != "",
+		"From":         shellQuote(param.FromStr()),
+		"ToExists":     param.ToStr() != "",
+		"To":           shellQuote(param.ToStr()),
+		"Pattern":      shellQuote(param.Pattern),
+		"HasLineUtil":  param.LineUtil != 0,
+		"LineUtil":     param.LineUtil,
 	}
 	bs, err := conn.template(queryShTemplate, params)
 	if err != nil {

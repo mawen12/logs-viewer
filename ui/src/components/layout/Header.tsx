@@ -7,7 +7,7 @@ export function Header() {
     const { toggleTheme } = useTheme();
 
     return (
-        <header className="sticky top-0 z-20 bg-white dark:bg-black flex h-10 items-center border-b px-4">
+        <header className="bg-white dark:bg-black flex h-10 items-center border-b px-4">
             <div className="text-lg font-semibold">
                 Logs-Viewer
             </div>

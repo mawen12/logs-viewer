@@ -96,6 +96,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 	param := QueryParam{
 		From:        readTime(query, "from", time.Time{}),
 		To:          readTime(query, "to", time.Time{}),
+		Refresh:     readBool(query, "refresh", false),
 		Pattern:     query.Get("query"),
 		MaxNumLines: readInt(query, "limit", 1),
 	}
@@ -165,6 +166,15 @@ func readTime(qs url.Values, key string, defaultTime time.Time) time.Time {
 	}
 
 	return t
+}
+
+func readBool(qs url.Values, key string, defaultBool bool) bool {
+	s := qs.Get(key)
+	if s == "" {
+		return defaultBool
+	}
+
+	return s == "true" || s == "1"
 }
 
 func writeJson(w http.ResponseWriter, r *http.Request, data any) {

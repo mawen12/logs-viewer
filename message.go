@@ -11,6 +11,7 @@ type QueryParam struct {
 	Pattern     string
 	From        time.Time
 	To          time.Time
+	Refresh     bool
 	LineUtil    int
 	MaxNumLines int
 	extParam    map[string]QueryParam
