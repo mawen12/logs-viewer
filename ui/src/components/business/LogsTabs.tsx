@@ -22,7 +22,7 @@ export function LogsTabs() {
                 <Tabs defaultValue={defaultValue}>
                     <TabsList>
                         {messageComposes.map((messageCompose) => (
-                            <TabsTrigger key={messageCompose.stream} value={messageCompose.stream} disabled={!messageCompose.logs || messageCompose.logs.length === 0}>
+                            <TabsTrigger key={messageCompose.stream} value={messageCompose.stream} disabled={!messageCompose.logs || messageCompose.logs?.length === 0}>
                                 {`${messageCompose.stream}<${messageCompose.logs?.length || 0}>`}
                             </TabsTrigger>
                         ))}

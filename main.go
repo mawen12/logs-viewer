@@ -5,9 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
+	
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 var (
@@ -21,16 +24,26 @@ var (
 var (
 	file   *os.File
 	reader *Reader
+	srv    *http.Server
 )
 
 func main() {
 	defer func() {
-		log.Println("defer close reader and file")
+		log.Println("defer close server, reader and file")
+		if srv != nil {
+			srv.Close()
+		}
+
+		fmt.Println("close server success")
 
 		if reader != nil {
-			reader.Clean(context.Background())
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+			reader.Clean(ctx)
 			reader.Close()
 		}
+
+		fmt.Println("close reader success")
 
 		if file != nil {
 			file.Close()
@@ -86,6 +99,7 @@ func main() {
 	}
 
 	done := make(chan struct{})
+	srv := NewServer(config)
 
 	go func() {
 		c := make(chan os.Signal, 1)
@@ -96,7 +110,8 @@ func main() {
 	}()
 
 	go func() {
-		if err := server(config); err != nil {
+		err := srv.ListenAndServe()
+		if err != nil {
 			fmt.Println("Can't start server:", err)
 			close(done)
 		}

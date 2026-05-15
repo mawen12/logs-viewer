@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"time"
 
+	_ "net/http/pprof"
+
 	ui "github.com/mawen12/logs-viewer/static"
 )
 
@@ -19,7 +21,7 @@ type serverConfig struct {
 	timeout time.Duration
 }
 
-func server(config serverConfig) error {
+func NewServer(config serverConfig) *http.Server {
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.port),
 		Handler: routes(config),
@@ -29,7 +31,7 @@ func server(config serverConfig) error {
 	fmt.Println("starting server", srv.Addr)
 	log.Println("starting server ", srv.Addr)
 
-	return srv.ListenAndServe()
+	return srv
 }
 
 func routes(config serverConfig) http.Handler {

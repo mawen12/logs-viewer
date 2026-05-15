@@ -29,7 +29,6 @@ export function StickyLogsCard() {
                         </TooltipContent>
                     </Tooltip>
 
-
                     <CopyButton />
 
                     <ToggleGroup type="single" orientation="horizontal" variant="outline" size="sm" value={direction}

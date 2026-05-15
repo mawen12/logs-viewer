@@ -62,27 +62,23 @@ export function QueryCard() {
             <CardContent>
                 <div className="flex flex-col gap-2">
                     <div className="flex flex-row gap-2">
-                        <div className="relative w-full">
-                            <Input value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={handleKeyDown} />
-                            <Label className="absolute top-[-10px] left-[6px] px-1 text-muted-foreground dark:bg-tranparent text-xs pointer-events-none" style={{
-                                backgroundColor: 'var(--bg)',
-                            }}>
-                                Query
+                        <div className="flex-1 flex gap-2">
+                            <Label htmlFor="query">
+                                Query:
                             </Label>
+                            <Input id="query" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={handleKeyDown} />
                         </div>
 
-                        <div className="relative w-48">
-                            <Input value={limit} onChange={(e) => setLimit(Number(e.target.value))} onKeyDown={handleKeyDown} />
-                            <Label className="absolute top-[-10px] left-[6px] px-1 text-muted-foreground text-xs pointer-events-none" style={{
-                                backgroundColor: 'var(--bg)',
-                            }}>
-                                Limit
+                        <div className="flex gap-2">
+                            <Label htmlFor="limit">
+                                Limit:
                             </Label>
+                            <Input id="limit" type="number" value={limit} onChange={(e) => setLimit(Number(e.target.value))} onKeyDown={handleKeyDown} />
                         </div>
                     </div>
 
                     <div className="flex flex-row items-center gap-2">
-                        {durationMs && <Badge variant={"outline"} className="text-gray-500" >Query: {durationMs}ms</Badge>}
+                        <Badge variant={"outline"} className="text-gray-500" >Query: {durationMs}ms</Badge>
                         <Badge variant={"outline"} className="text-gray-500">Fetched Count: {fetchedCount}</Badge>
                         <Badge variant={"outline"} className="text-gray-500">Matched Count: {matchedCount}</Badge>
 

@@ -285,7 +285,8 @@ Loop:
 		select {
 		case retAndErr, ok := <-stdoutChan:
 			if !ok {
-				continue
+				log.Println("receive stdoutchan not ok")
+				break Loop
 			}
 			if retAndErr.Err != nil {
 				return nil, retAndErr.Err
@@ -327,7 +328,8 @@ Loop:
 
 		case retAndErr, ok := <-stderrChan:
 			if !ok {
-				continue
+				log.Println("receive stderrchan not ok")
+				break Loop
 			}
 			if retAndErr.Err != nil {
 				return nil, retAndErr.Err
@@ -371,9 +373,8 @@ func (conn *CommonConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 		for {
 			line, err := conn.stdoutBuf.ReadString('\n')
 			if err != nil || line == "" {
-				// retChan <- RetAndErr{Err: err}
-				// break
-				continue
+				log.Println("receve err or empty from stdoutbuf", err, line)
+				return
 			}
 			if *debug {
 				fmt.Print("[STDOUT]", line)
@@ -432,9 +433,8 @@ func (conn *CommonConn) StderrReceive(ctx context.Context) chan RetAndErr {
 		for {
 			line, err := conn.stderrBuf.ReadString('\n')
 			if err != nil || line == "" {
-				// retChan <- RetAndErr{Err: err}
-				// break
-				continue
+				log.Println("receve err or empty from stderrBuf", err, line)
+				return
 			}
 			if *debug {
 				fmt.Print("[STDERR]", line)

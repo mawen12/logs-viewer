@@ -15,12 +15,7 @@ export function ComposeLogs() {
             } else {
                 return a.num - b.num;
             }
-        })
-
-        allLogs.every(log => {
-            log.id = `${log.time}-${log.num}-${log.stream}`;
-            return true;
-        })        
+        });    
 
         return allLogs;
     }, [messageComposes]);

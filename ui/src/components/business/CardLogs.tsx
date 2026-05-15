@@ -8,9 +8,9 @@ type CardLogsProps = {
 export function CardLogs({ logs }: CardLogsProps) {
     return (
         <>
-            {logs && logs.map((log) => (
-                <div key={log.id} className="px-2">
-                    <SimpleLog key={log.id} {...log} />
+            {logs && logs.map((log, index) => (
+                <div key={index} className="px-2">
+                    <SimpleLog {...log} />
                 </div>
             ))}
         </>

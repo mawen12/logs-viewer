@@ -1,5 +1,4 @@
 export interface Log {
-    id: string,
     stream: string,
 
     time: number,
