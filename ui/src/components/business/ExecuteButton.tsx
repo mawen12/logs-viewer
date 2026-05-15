@@ -13,13 +13,13 @@ interface ExecuteButtonProps {
 export function ExecuteButton({ loading, handleQuery }: ExecuteButtonProps) {
     return (
         <ButtonGroup>
-            <Button variant="outline" onClick={() => handleQuery(false)} disabled={loading}>
+            <Button variant="outline" size="sm" onClick={() => handleQuery(false)} disabled={loading}>
                 {loading ? <Spinner /> : <IconCaretRightFilled />}
                 Execute
             </Button>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" disabled={loading}>
+                    <Button variant="outline" size="icon-sm" disabled={loading}>
                         <MoreHorizontalIcon />
                     </Button>
                 </DropdownMenuTrigger>

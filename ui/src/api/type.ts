@@ -1,9 +1,12 @@
 export interface Log {
     id: string,
-    time: number,
     stream: string,
+
+    time: number,
+    level?: string,
+    threadName?: string,
     num: number,
-    message: string
+    message: string,
 }
 
 export interface Stat {

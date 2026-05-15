@@ -163,7 +163,8 @@ type CommonConn struct {
 	stdout, stderr       io.Reader
 	stdoutBuf, stderrBuf *bufio.Reader
 
-	exts map[string]string
+	exts   map[string]string
+	parser *LogParser
 }
 
 func NewCommonConn(prefixPath string, url ParsedUrl, stdin io.WriteCloser, stdout, stderr io.Reader) *CommonConn {
@@ -180,6 +181,7 @@ func NewCommonConn(prefixPath string, url ParsedUrl, stdin io.WriteCloser, stdou
 		stdoutBuf:  stdoutBuf,
 		stderrBuf:  stderrBuf,
 		exts:       make(map[string]string),
+		parser:     &LogParser{},
 	}
 }
 
@@ -271,16 +273,6 @@ func (conn *CommonConn) template(tmpl string, params map[string]any) ([]byte, er
 	return bs, nil
 }
 
-func extractTime(message string) int64 {
-	timeStr := message[:23]
-	t, err := time.Parse(LayoutDateTimeMillisecondComma, timeStr)
-	if err != nil {
-		return -1
-	}
-
-	return t.UnixNano() / int64(time.Millisecond)
-}
-
 func (conn *CommonConn) receive(ctx context.Context) (*MessageCompose, error) {
 	var stdoutEnd, stderrEnd bool
 	messageCompose := &MessageCompose{}
@@ -307,11 +299,12 @@ Loop:
 			case *ErrRet:
 				messageCompose.Errs = append(messageCompose.Errs, errors.New(ret.Message))
 			case *DataRet:
-				messageCompose.Logs = append(messageCompose.Logs, Log{
-					Time:    extractTime(ret.Message),
+				log := &Log{
 					Num:     ret.CurNR,
 					Message: ret.Message,
-				})
+				}
+				conn.parser.Parse(log)
+				messageCompose.Logs = append(messageCompose.Logs, log)
 			case *StatRet:
 				messageCompose.Stats = append(messageCompose.Stats, Stat{
 					Time:  ret.Time.Unix(),

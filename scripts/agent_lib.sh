@@ -116,6 +116,10 @@ awk_funcs='
     return substr($0, 12, 5);
   }
 
+  function awktime_datehhmm() {
+    return substr($0, 0, 17);
+  }
+
   function awktime_month() {
     return substr($0, 6, 2);
   }

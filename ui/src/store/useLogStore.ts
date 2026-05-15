@@ -2,8 +2,7 @@ import type { FetchLogsParams, MessageCompose, Stat } from "@/api/type";
 import { create } from "zustand";
 
 type LogStore = {
-    direction: "line" | "tabs",
-    setDirection: (direction: "line" | "tabs") => void,
+    
     loading: boolean,
     setLoading: (loading: boolean) => void,
     err: string | undefined,
@@ -18,8 +17,6 @@ type LogStore = {
 }
 
 export const useLogStore = create<LogStore>((set) => ({
-    direction: "tabs",
-    setDirection: (direction: "line" | "tabs") => set({ direction }),
     loading: false,
     setLoading: (loading: boolean) => set({ loading }),
     err: undefined,

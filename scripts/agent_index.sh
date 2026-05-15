@@ -4,12 +4,12 @@ run_awk_index_script () {
 
     BEGIN {
       if ("'$lastTimeStr'" != "") {
-        lastHHMM = substr("'$lastTimeStr'", 12, 5);
+        dateHHMM = substr("'$lastTimeStr'", 0, 17);
       } else {
-        lastHHMM = ""
+        dateHHMM = ""
       }
 
-      print "N:awk_index:lastHHMM is " lastHHMM
+      print "N:awk_index:dateHHMM is " dateHHMM
       
       bytenr_next = 1;
       lastPercent = 0;
@@ -21,11 +21,11 @@ run_awk_index_script () {
     {
       bytenr_next += length($0) + 1;
       if (validPrefix()) {
-        curHHMM = awktime_hhmm();
+        curHHMM = awktime_datehhmm();
       }
     }
 
-    (lastHHMM != curHHMM) {
+    (dateHHMM != curHHMM) {
       bytenr_cur = bytenr_next - length($0) - 1;    # 计算截至该行之前的累计字节数
       month = awktime_month();                      # 提取该行的月份 01
       year = awktime_year();                        # 提取该行的年份 2006
@@ -39,7 +39,7 @@ run_awk_index_script () {
       printIndexLine("'$indexfile'", curTimestr, NR + '$((last_linenr-1))', bytenr_cur + '$((last_bytenr-1))');
       printPercentage(bytenr_cur, size_to_index);
       lastTimestr = curTimestr;
-      lastHHMM = curHHMM;
+      dateHHMM = curHHMM;
     }
   '
 

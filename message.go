@@ -42,15 +42,17 @@ func (param QueryParam) String() string {
 
 type MessageCompose struct {
 	Stream string  `json:"stream"`
-	Logs   []Log   `json:"logs"`
+	Logs   []*Log  `json:"logs"`
 	Stats  []Stat  `json:"stats"`
 	Errs   []error `json:"errs"`
 }
 
 type Log struct {
-	Time    int64  `json:"time"`
-	Num     int    `json:"num"`
-	Message string `json:"message"`
+	Time       int64  `json:"time"`
+	Level      string `json:"level"`
+	ThreadName string `json:"threadName"`
+	Num        int    `json:"num"`
+	Message    string `json:"message"`
 }
 
 type Stat struct {

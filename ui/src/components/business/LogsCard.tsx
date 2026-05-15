@@ -1,4 +1,4 @@
-import { useLogStore } from "@/store/useLogStore";
+import { useAppStore } from "@/store/useAppStore";
 import { IconLineDashed, IconTallymark1 } from '@tabler/icons-react';
 import { Card, CardContent, CardHeader } from "../ui/card";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
@@ -6,7 +6,7 @@ import { ComposeLogs } from "./ComposeLogs";
 import { LogsTabs } from "./LogsTabs";
 
 export function LogsCard() {
-    const {direction, setDirection} = useLogStore();
+    const {direction, setDirection} = useAppStore();
 
     return (
         <Card className="h-full min-h-0">

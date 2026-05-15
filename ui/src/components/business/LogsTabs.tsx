@@ -8,7 +8,7 @@ export function LogsTabs() {
     const { messageComposes } = useLogStore();
 
     const defaultValue = useMemo(() => {
-        for (let i  = 0; i < messageComposes.length; i++) {
+        for (let i = 0; i < messageComposes.length; i++) {
             if (messageComposes[i].logs && messageComposes[i].logs?.length > 0) {
                 return messageComposes[i].stream;
             }
@@ -18,20 +18,22 @@ export function LogsTabs() {
 
     return (
         <>
-        { messageComposes.length > 0 &&  (
-            <Tabs defaultValue={defaultValue}>
-                <TabsList>
+            {messageComposes.length > 0 && (
+                <Tabs defaultValue={defaultValue}>
+                    <TabsList>
+                        {messageComposes.map((messageCompose) => (
+                            <TabsTrigger key={messageCompose.stream} value={messageCompose.stream} disabled={!messageCompose.logs || messageCompose.logs.length === 0}>
+                                {`${messageCompose.stream}<${messageCompose.logs?.length || 0}>`}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
                     {messageComposes.map((messageCompose) => (
-                        <TabsTrigger key={messageCompose.stream} value={messageCompose.stream}>{`${messageCompose.stream}<${messageCompose.logs?.length || 0}>`}</TabsTrigger>
+                        <TabsContent key={messageCompose.stream} value={messageCompose.stream} className="h-full min-h-0">
+                            <CardLogs logs={messageCompose.logs || []} />
+                        </TabsContent>
                     ))}
-                </TabsList>
-                {messageComposes.map((messageCompose) => (
-                    <TabsContent key={messageCompose.stream} value={messageCompose.stream} className="h-full min-h-0">
-                        <CardLogs logs={messageCompose.logs || []} />
-                    </TabsContent>
-                ))}
-            </Tabs>
-        )}
+                </Tabs>
+            )}
         </>
     )
 }
