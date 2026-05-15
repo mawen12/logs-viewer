@@ -8,7 +8,12 @@ export function LogsTabs() {
     const { messageComposes } = useLogStore();
 
     const defaultValue = useMemo(() => {
-        return messageComposes[0]?.stream || "";
+        for (let i  = 0; i < messageComposes.length; i++) {
+            if (messageComposes[i].logs && messageComposes[i].logs?.length > 0) {
+                return messageComposes[i].stream;
+            }
+        }
+        return "";
     }, [messageComposes])
 
     return (

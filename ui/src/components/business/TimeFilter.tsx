@@ -7,6 +7,7 @@ import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { strToDateTimeMinute } from "@/utils/TimeUtils";
 
 const PRESETS = [
     "5m",
@@ -47,7 +48,7 @@ export function TimeFilter() {
                 </Button>
             </PopoverTrigger>
             <PopoverContent>
-                <Tabs>
+                <Tabs defaultValue={type}>
                     <TabsList className="grid grid-cols-2 w-full">
                         <TabsTrigger value="quick">Quick</TabsTrigger>
                         <TabsTrigger value="absolute">Absolute</TabsTrigger>
@@ -63,6 +64,10 @@ export function TimeFilter() {
                                     onClick={() => {
                                         setRange(p)
                                         setType("quick")
+                                        const {from: fromStr, to: toStr} = strToDateTimeMinute(p)
+                                        setFrom(fromStr)
+                                        setTo(toStr)
+                                        setTimeParams({ from: fromStr, to: toStr })
                                         setOpen(false)
                                     }}
                                 >

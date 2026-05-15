@@ -27,4 +27,5 @@ export interface FetchLogsParams {
     limit: number,
     from?: string,
     to?: string,
+    refresh?: boolean,
 }

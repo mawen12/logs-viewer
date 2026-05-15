@@ -3,15 +3,13 @@ import { useAppStore } from "@/store/useAppStore";
 import { useLogStore } from "@/store/useLogStore";
 import { useQueryStore } from "@/store/useQueryStore";
 import { useTimeStore } from "@/store/useTimeStore";
-import { strToTime } from "@/utils/TimeUtils";
-import { IconCaretRightFilled } from "@tabler/icons-react";
+import { strToDateTimeMinuteDash } from "@/utils/TimeUtils";
 import { useMemo } from "react";
 import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Spinner } from "../ui/spinner";
+import { ExecuteButton } from "./ExecuteButton";
 
 export function QueryCard() {
     const { type, range, timeParams } = useTimeStore();
@@ -29,22 +27,23 @@ export function QueryCard() {
         return stats.reduce((sum, s) => sum + s.count, 0)
     }, [stats])
 
-    const getParams = (): FetchLogsParams => {
-        let fromStr = "", toStr = "";
+    const getParams = (refresh: boolean = false): FetchLogsParams => {
+        let from = "", to = "";
         if (type === "quick") {
-            const { from: quickFrom, to: quickTo } = strToTime(range)
-            fromStr = quickFrom;
-            toStr = quickTo;
+            const { from: quickFrom, to: quickTo } = strToDateTimeMinuteDash(range)
+            from = quickFrom;
+            to = quickTo;
         } else {
-            fromStr = timeParams.from || "";
-            toStr = timeParams.to || "";
+            from = timeParams.from || "";
+            to = timeParams.to || "";
         }
 
         return {
             query: query,
             limit: limit,
-            from: fromStr,
-            to: toStr,
+            from: from,
+            to: to,
+            refresh: refresh,
         }
     }
 
@@ -54,8 +53,8 @@ export function QueryCard() {
         }
     }
 
-    const handleQuery = () => {
-        fetchLogs(serverUrl, getParams())
+    const handleQuery = (refresh: boolean = false) => {
+        fetchLogs(serverUrl, getParams(refresh))
     }
 
     return (
@@ -88,10 +87,7 @@ export function QueryCard() {
                         <Badge variant={"outline"} className="text-gray-500">Matched Count: {matchedCount}</Badge>
 
                         <div className="ml-auto">
-                            <Button variant="outline" onClick={handleQuery} disabled={loading}>
-                                {loading ? <Spinner /> : <IconCaretRightFilled />}
-                                Execute
-                            </Button>
+                            <ExecuteButton loading={loading} handleQuery={handleQuery} />
                         </div>
                     </div>
 

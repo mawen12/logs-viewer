@@ -72,7 +72,8 @@ const getLogsUrl = (server: string, params: FetchLogsParams) => {
     const limit = params.limit.toString() || "1";
     const from = params.from || "";
     const to = params.to || "";
+    const refresh = params.refresh  ?  "true" : "false";
 
-    const ps = new URLSearchParams({ query, limit, from, to })
+    const ps = new URLSearchParams({ query, limit, from, to, refresh })
     return `${server}/query?${ps.toString()}`
 }
