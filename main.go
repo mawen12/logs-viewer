@@ -25,7 +25,7 @@ var (
 
 func main() {
 	defer func() {
-		fmt.Println("defer close reader and file")
+		log.Println("defer close reader and file")
 
 		if reader != nil {
 			reader.Clean(context.Background())
@@ -85,17 +85,25 @@ func main() {
 		port: uint32(*port),
 	}
 
+	done := make(chan struct{})
+
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+		notify := <-c
+		log.Println("receive signal", notify)
+		close(done)
+	}()
+
 	go func() {
 		if err := server(config); err != nil {
-			fmt.Println("Cann't start server:", err)
-			os.Exit(1)
+			fmt.Println("Can't start server:", err)
+			close(done)
 		}
 	}()
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
-	notify := <-c
-	fmt.Println("receive signal ", notify)
+	<-done
+	log.Println("exit system")
 
 	// from, err := time.Parse(LayoutDateTimeMinuteDash, "2026-05-13-11:47")
 	// if err != nil {

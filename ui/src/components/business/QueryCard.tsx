@@ -1,24 +1,25 @@
 import type { FetchLogsParams } from "@/api/type";
-import { useLogsState } from "@/contexts/LogsStateProvider";
-import { useQueryState } from "@/contexts/QueryStateProvider";
-import { useTimeState } from "@/contexts/TimeStateProvider";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Button } from "../ui/button";
-import { Spinner } from "../ui/spinner";
-import { Card, CardContent } from "../ui/card";
+import { useAppStore } from "@/store/useAppStore";
+import { useLogStore } from "@/store/useLogStore";
+import { useQueryStore } from "@/store/useQueryStore";
+import { useTimeStore } from "@/store/useTimeStore";
 import { strToTime } from "@/utils/TimeUtils";
-import { useFetchLogs } from "@/hooks/useFetchLogs";
-import { Badge } from "../ui/badge";
 import { IconCaretRightFilled } from "@tabler/icons-react";
 import { useMemo } from "react";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Spinner } from "../ui/spinner";
 
 export function QueryCard() {
-    const { type, range, timeParams } = useTimeState();
-    const { query, setQuery, limit, setLimit } = useQueryState()
+    const { type, range, timeParams } = useTimeStore();
+    const {query, setQuery, limit, setLimit} = useQueryStore();
 
-    const { fetchLogs, } = useFetchLogs();
-    const { loading, durationMs, messageComposes, stats } = useLogsState()
+    const {serverUrl} = useAppStore();
+    const { fetchLogs } = useLogStore();
+    const { loading, durationMs, messageComposes, stats } = useLogStore();
 
     const fetchedCount = useMemo(() => {
         return messageComposes.reduce((sum, mc) => sum + (mc.logs?.length || 0), 0)
@@ -54,7 +55,7 @@ export function QueryCard() {
     }
 
     const handleQuery = () => {
-        fetchLogs(getParams())
+        fetchLogs(serverUrl, getParams())
     }
 
     return (

@@ -1,4 +1,4 @@
-import type { TimeParams } from "@/contexts/TimeStateProvider";
+import type { TimeParams } from "@/store/useTimeStore";
 import dayjs from "dayjs";
 
 const map: Record<string, dayjs.ManipulateType> = {

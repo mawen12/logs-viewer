@@ -1,13 +1,12 @@
-import { useAppState } from "@/contexts/AppStateProvider";
+import { useLogStore } from "@/store/useLogStore";
+import { IconLineDashed, IconTallymark1 } from '@tabler/icons-react';
 import { Card, CardContent, CardHeader } from "../ui/card";
-import { LogsTabs } from "./LogsTabs";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
-import { IconLineDashed } from '@tabler/icons-react';
-import { IconTallymark1 } from '@tabler/icons-react';
 import { ComposeLogs } from "./ComposeLogs";
+import { LogsTabs } from "./LogsTabs";
 
 export function LogsCard() {
-    const {direction, setDirection} = useAppState();
+    const {direction, setDirection} = useLogStore();
 
     return (
         <Card className="h-full min-h-0">

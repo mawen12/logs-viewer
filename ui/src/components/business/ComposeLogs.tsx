@@ -1,10 +1,10 @@
 import type { Log } from "@/api/type";
-import { useLogsState } from "@/contexts/LogsStateProvider";
+import { useLogStore } from "@/store/useLogStore";
 import { useMemo } from "react";
 import { CardLogs } from "./CardLogs";
 
 export function ComposeLogs() {
-    const { messageComposes } = useLogsState();
+    const { messageComposes } = useLogStore();
 
     const composedLogs = useMemo<Log[]>(() => {
         const allLogs = messageComposes.flatMap(mc => mc.logs || []);

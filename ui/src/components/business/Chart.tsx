@@ -1,5 +1,5 @@
-import { useLogsState } from "@/contexts/LogsStateProvider";
 import { useResizeObserver, type Size } from "@/hooks/useResizeObserver";
+import { useLogStore } from "@/store/useLogStore";
 import { useEffect, useMemo, useRef, useState } from "react";
 import uPlot, { type AlignedData, type Options } from "uplot";
 import "uplot/dist/uPlot.min.css";
@@ -12,7 +12,7 @@ export function Chart() {
 
     const [containerSize, setContainerSize] = useState<Size>({ width: 0, height: 0 });
     
-    const {stats} = useLogsState();
+    const {stats} = useLogStore();
 
     const options: Options = {
         width: containerSize.width || window.innerWidth / 2,

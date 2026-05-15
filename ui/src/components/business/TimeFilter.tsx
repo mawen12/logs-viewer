@@ -1,12 +1,12 @@
+import { useTimeStore } from "@/store/useTimeStore";
 import { IconClockHour5 } from "@tabler/icons-react";
-import { useState } from "react";
 import dayjs from "dayjs";
-import { useTimeState } from "@/contexts/TimeStateProvider";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Input } from "../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 
 const PRESETS = [
     "5m",
@@ -18,14 +18,26 @@ const PRESETS = [
 ]
 
 export function TimeFilter() {
-    const { setType,range, setRange, timeParams, setTimeParams,description} = useTimeState();
+    const { type, setType, range, setRange, timeParams, setTimeParams, description, setDescription } = useTimeStore();
 
-    // const [range, setRange] = useState("5m")
-    // const [type, setType] = useState<"quick" | "absolute" | "input">("quick")
 
     const [open, setOpen] = useState(false)
     const [from, setFrom] = useState(timeParams.from || dayjs(Date.now()).subtract(15, "minute").format("YYYY-MM-DDTHH:mm"))
     const [to, setTo] = useState(timeParams.to || dayjs(Date.now()).format("YYYY-MM-DDTHH:mm"))
+
+    useEffect(() => {
+        if (type === "quick") {
+            setDescription(`last ${range}`)
+        }
+        else if (type === "absolute") {
+            const fromDJ = dayjs(timeParams.from)
+            const toDJ = dayjs(timeParams.to || Date.now())
+            setDescription(`${fromDJ.format("YYYY-MM-DD HH:mm")} - ${toDJ.format("YYYY-MM-DD HH:mm")}`)
+        }
+        else if (type === "input") {
+            setDescription(`last ${range}`)
+        }
+    }, [type, range, timeParams])
 
     return (
         <Popover open={open} onOpenChange={setOpen}>
