@@ -368,7 +368,7 @@ type RetAndErr struct {
 func (conn *CommonConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 	retChan := make(chan RetAndErr, 10)
 
-	go func() {
+	background("stdout-recevie", func() {
 		defer close(retChan)
 		for {
 			line, err := conn.stdoutBuf.ReadString('\n')
@@ -420,7 +420,7 @@ func (conn *CommonConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 			}
 
 		}
-	}()
+	})
 
 	return retChan
 }
@@ -428,7 +428,7 @@ func (conn *CommonConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 func (conn *CommonConn) StderrReceive(ctx context.Context) chan RetAndErr {
 	retChan := make(chan RetAndErr, 10)
 
-	go func() {
+	background("stderr-receive", func() {
 		defer close(retChan)
 		for {
 			line, err := conn.stderrBuf.ReadString('\n')
@@ -473,7 +473,7 @@ func (conn *CommonConn) StderrReceive(ctx context.Context) chan RetAndErr {
 			}
 
 		}
-	}()
+	})
 
 	return retChan
 }

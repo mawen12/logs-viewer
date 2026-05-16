@@ -148,7 +148,7 @@ func (r *Reader) Connect(ctx context.Context) error {
 			return err
 		}
 		log.Println("connect msg", msg)
-			}
+	}
 	return nil
 }
 
@@ -175,24 +175,25 @@ func (r *Reader) parallelExecute(ctx context.Context, execute executer) []Messag
 	wg.Add(len(r.conns))
 
 	for _, conn := range r.conns {
-		go func() {
+		background("reader-parallel-execute", func() {
 			defer wg.Done()
 
 			msg, err := execute(ctx, conn)
 			if err != nil {
+				log.Println("execute err", err)
 				msg = &MessageCompose{
 					Errs: []error{err},
 				}
 			}
 			msg.Stream = conn.Url().stream
 			retChan <- *msg
-		}()
+		})
 	}
 
-	go func() {
+	background("read-parallel-wait", func() {
 		wg.Wait()
 		close(retChan)
-	}()
+	})
 
 	rets := make([]MessageCompose, 0)
 	for ret := range retChan {

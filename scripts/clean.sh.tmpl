@@ -3,9 +3,11 @@ trap 'echo "Z:" 1>&2; echo "Z:"' EXIT
 echo 'A:'
 echo 'A:' 1>&2
 
+echo 'N:start clean {{ .PrefixPath }}'
+
 cd
 
-if [[ ! -d {{ .PrefixPath }} ]]; then
+if [ ! -d {{ .PrefixPath }} ]; then
     echo 'E:1:Dir {{.PrefixPath}} not exists' 1>&2
     exit 1
 fi

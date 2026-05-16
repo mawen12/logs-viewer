@@ -3,12 +3,18 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"expvar"
 	"fmt"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"os/signal"
+	"runtime"
 	"sort"
 	"strconv"
+	"syscall"
 	"time"
 
 	_ "net/http/pprof"
@@ -21,17 +27,57 @@ type serverConfig struct {
 	timeout time.Duration
 }
 
-func NewServer(config serverConfig) *http.Server {
+func serve(config serverConfig) error {
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", config.port),
-		Handler: routes(config),
+		Addr:         fmt.Sprintf(":%d", config.port),
+		Handler:      routes(config),
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 		// ErrorLog: "",
 	}
 
-	fmt.Println("starting server", srv.Addr)
+	shutdownError := make(chan error)
+
+	// tip: this cannot use background, because it wait `group` to end, otherwise then into infinite loop
+	go func() {
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		s := <-quit
+
+		log.Println("shutting down server quit ", s.String())
+
+		reader.Clean(context.Background())
+
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+
+		err := srv.Shutdown(ctx)
+		if err != nil {
+			shutdownError <- err
+		}
+
+		done, total := group.Progress()
+		log.Println("completing background tasks ", srv.Addr, fmt.Sprintf("%d/%d", done, total))
+
+		group.Wait()
+		shutdownError <- nil
+	}()
+
 	log.Println("starting server ", srv.Addr)
 
-	return srv
+	err := srv.ListenAndServe()
+	if !errors.Is(err, http.ErrServerClosed) {
+		return err
+	}
+
+	err = <-shutdownError
+	if err != nil {
+		return err
+	}
+
+	log.Println("stopped server", srv.Addr)
+
+	return nil
 }
 
 func routes(config serverConfig) http.Handler {
@@ -41,6 +87,16 @@ func routes(config serverConfig) http.Handler {
 	mux.HandleFunc("GET /static/*path", http.StripPrefix("static", ui.GetHandler()).ServeHTTP)
 	mux.HandleFunc("GET /favicon.svg", ui.GetHandler().ServeHTTP)
 	mux.HandleFunc("GET /query", query)
+	if *debug {
+		expvar.Publish("goroutines", expvar.Func(func() any {
+			return runtime.NumGoroutine()
+		}))
+		expvar.Publish("background-goroutines", expvar.Func(func() any {
+			done, total := group.Progress()
+			return fmt.Sprintf("%d/%d", done, total)
+		}))
+		mux.HandleFunc("GET /debug/vars", expvar.Handler().ServeHTTP)
+	}
 
 	return recoverPanic(logRequest(crossOrigin(mux)))
 }

@@ -5,17 +5,15 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
-	
-	"os"
-	"os/signal"
-	"syscall"
+	"sync"
+	"sync/atomic"
 	"time"
+
+	"os"
 )
 
 var (
 	configPath = flag.String("config", "", "config file path")
-	failFast   = flag.Bool("fail-fast", false, "fail fast when parse config file line")
 	logfile    = flag.String("logfile", "logs.log", "log record file")
 	port       = flag.Int("port", 9081, "server port")
 	debug      = flag.Bool("debug", false, "debug")
@@ -24,21 +22,40 @@ var (
 var (
 	file   *os.File
 	reader *Reader
-	srv    *http.Server
+	group  Group
 )
+
+type Group struct {
+	wg    sync.WaitGroup
+	total atomic.Int64
+	done  atomic.Int64
+}
+
+func (g *Group) Add(n int) {
+	g.total.Add(1)
+	g.wg.Add(1)
+}
+
+func (g *Group) Done() {
+	g.done.Add(1)
+	g.wg.Done()
+}
+
+func (g *Group) Wait() {
+	g.wg.Wait()
+}
+
+func (g *Group) Progress() (done, total int64) {
+	return g.done.Load(), g.total.Load()
+}
 
 func main() {
 	defer func() {
-		log.Println("defer close server, reader and file")
-		if srv != nil {
-			srv.Close()
-		}
-
-		fmt.Println("close server success")
-
 		if reader != nil {
-			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 			defer cancel()
+
+			// todo fix, when receive SIGINT signal then will shutdown the stdin, so this command cannot success call
 			reader.Clean(ctx)
 			reader.Close()
 		}
@@ -98,27 +115,10 @@ func main() {
 		port: uint32(*port),
 	}
 
-	done := make(chan struct{})
-	srv := NewServer(config)
-
-	go func() {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
-		notify := <-c
-		log.Println("receive signal", notify)
-		close(done)
-	}()
-
-	go func() {
-		err := srv.ListenAndServe()
-		if err != nil {
-			fmt.Println("Can't start server:", err)
-			close(done)
-		}
-	}()
-
-	<-done
-	log.Println("exit system")
+	err := serve(config)
+	if err != nil {
+		panic(err)
+	}
 
 	// from, err := time.Parse(LayoutDateTimeMinuteDash, "2026-05-13-11:47")
 	// if err != nil {
@@ -169,3 +169,21 @@ func main() {
 // 		}
 // 	}
 // }
+
+func background(name string, fn func()) {
+	group.Add(1)
+
+	go func() {
+		defer group.Done()
+
+		defer func() {
+			if err := recover(); err != nil {
+				log.Println(err)
+			}
+			log.Println("goroutine stop for ", name)
+		}()
+
+		log.Println("goroutine start for ", name)
+		fn()
+	}()
+}
