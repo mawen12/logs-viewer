@@ -92,6 +92,39 @@ func shellQuote(s string) string {
 	return fmt.Sprintf("'%s'", strings.Replace(s, "'", "'\"'\"'", -1))
 }
 
+func (conn *SshConn) NewInstance() (Conn, error) {
+	newSession, err := conn.client.NewSession()
+	if err != nil {
+		return nil, err
+	}
+
+	stdin, err := newSession.StdinPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	stdout, err := newSession.StdoutPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	stderr, err := newSession.StderrPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := newSession.Start("/bin/sh"); err != nil {
+		return nil, err
+	}
+
+	return &OnceConn{
+		CommonConn: NewCommonConn(conn.prefixPath, conn.url, stdin, stdout, stderr),
+		closeFunc: func() {
+			newSession.Close()
+		},
+	}, nil
+}
+
 func (conn *SshConn) Close() {
 	conn.session.Close()
 	conn.client.Close()
@@ -131,6 +164,34 @@ func NewCmdConn(prefixPath string, url ParsedUrl) (*CmdConn, error) {
 	}, nil
 }
 
+func (conn *CmdConn) NewInstance() (Conn, error) {
+	cmd := exec.Command("/bin/sh")
+
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := cmd.Start(); err != nil {
+		return nil, err
+	}
+
+	return &CmdConn{
+		CommonConn: NewCommonConn(conn.prefixPath, conn.url, stdin, stdout, stderr),
+		cmd:        cmd,
+	}, nil
+}
+
 func (conn *CmdConn) Close() {
 	if conn.stdin != nil {
 		conn.stdin.Close()
@@ -146,8 +207,22 @@ func (conn *CmdConn) Close() {
 	}
 }
 
+type OnceConn struct {
+	*CommonConn
+	closeFunc func()
+}
+
+func (conn *OnceConn) NewInstance() (Conn, error) {
+	return nil, errors.New("cannot new instance from once conn")
+}
+
+func (conn *OnceConn) Close() {
+	conn.closeFunc()
+}
+
 type Conn interface {
 	Url() ParsedUrl
+	NewInstance() (Conn, error)
 	Start(context.Context) (*MessageCompose, error)
 	Query(context.Context, QueryParam) (*MessageCompose, error)
 	Clean(context.Context) (*MessageCompose, error)

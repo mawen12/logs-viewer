@@ -17,6 +17,7 @@ var (
 	logfile    = flag.String("logfile", "logs.log", "log record file")
 	port       = flag.Int("port", 9081, "server port")
 	debug      = flag.Bool("debug", false, "debug")
+	mode       = flag.String("mode", "parallel", "conn run mode")
 )
 
 var (
@@ -91,7 +92,7 @@ func main() {
 		}
 	}
 
-	reader = NewReader(*configPath)
+	reader = NewReader(*configPath, *mode)
 	if err := reader.LoadConfig(); err != nil {
 		panic(err)
 	}

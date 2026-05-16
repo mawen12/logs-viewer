@@ -16,6 +16,7 @@ import (
 
 type Reader struct {
 	configPath string
+	mode       string
 	prefixPath string
 	lines      []string
 	urls       []ParsedUrl
@@ -51,9 +52,10 @@ func (url ParsedUrl) LogName() string {
 	return url.log[lastSlash+1 : lastPoint]
 }
 
-func NewReader(configPath string) *Reader {
+func NewReader(configPath string, mode string) *Reader {
 	return &Reader{
 		configPath: configPath,
+		mode:       mode,
 		prefixPath: fmt.Sprintf("/tmp/%s", uuid.New().String()),
 		lines:      make([]string, 0),
 		urls:       make([]ParsedUrl, 0),
@@ -154,6 +156,17 @@ func (r *Reader) Connect(ctx context.Context) error {
 
 func (r *Reader) Query(ctx context.Context, param QueryParam) []MessageCompose {
 	execute := func(ctx context.Context, c Conn) (*MessageCompose, error) {
+		var newConn Conn
+		if r.mode != "single" {
+			var err error
+			newConn, err = c.NewInstance()
+			if err != nil {
+				return nil, err
+			}
+			defer newConn.Close() // once conn need to be closed after used
+		} else {
+			newConn = c
+		}
 		return c.Query(ctx, param)
 	}
 
