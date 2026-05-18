@@ -19,6 +19,7 @@ import (
 
 	_ "net/http/pprof"
 
+	"github.com/google/uuid"
 	ui "github.com/mawen12/logs-viewer/static"
 )
 
@@ -55,6 +56,7 @@ func serve(config serverConfig) error {
 		if err != nil {
 			shutdownError <- err
 		}
+		hub.Close()
 
 		done, total := group.Progress()
 		log.Println("completing background tasks ", srv.Addr, fmt.Sprintf("%d/%d", done, total))
@@ -83,10 +85,11 @@ func serve(config serverConfig) error {
 func routes(config serverConfig) http.Handler {
 	mux := &http.ServeMux{}
 
-	mux.HandleFunc("GET /", ui.GetHandler().ServeHTTP)
+	mux.HandleFunc("/", ui.GetHandler().ServeHTTP)
 	mux.HandleFunc("GET /static/*path", http.StripPrefix("static", ui.GetHandler()).ServeHTTP)
 	mux.HandleFunc("GET /favicon.svg", ui.GetHandler().ServeHTTP)
 	mux.HandleFunc("GET /query", query)
+	mux.HandleFunc("/ws", serveWs)
 	if *debug {
 		expvar.Publish("goroutines", expvar.Func(func() any {
 			return runtime.NumGoroutine()
@@ -98,7 +101,7 @@ func routes(config serverConfig) http.Handler {
 		mux.HandleFunc("GET /debug/vars", expvar.Handler().ServeHTTP)
 	}
 
-	return recoverPanic(logRequest(crossOrigin(mux)))
+	return recoverPanic(logRequest(crossOrigin(uidWebsocket(mux))))
 }
 
 func recoverPanic(next http.Handler) http.Handler {
@@ -126,6 +129,17 @@ func logRequest(next http.Handler) http.Handler {
 		)
 
 		log.Println("handle request", "ip", ip, "proto", proto, "method", method, "uri", uri)
+		fmt.Println("handle request method", method, "uri", uri)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func uidWebsocket(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		uid := r.URL.Query().Get("uid")
+		fmt.Println("uid is", uid)
+		ctx := context.WithValue(r.Context(), "uid", uid)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -134,10 +148,10 @@ func logRequest(next http.Handler) http.Handler {
 func crossOrigin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token, Authorization, Token,X-Token,X-User-Id,X-Requested-With")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token, Authorization, Token,X-Token,X-User-Id,X-Requested-With, Uid")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS,DELETE,PUT")
-		w.Header().Set("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type, Logs-Viewer-Cost-Ms")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type, Logs-Viewer-Cost-Ms, Uid")
+		// w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		next.ServeHTTP(w, r)
 	})
@@ -195,6 +209,35 @@ func query(w http.ResponseWriter, r *http.Request) {
 		Stats:           sortedStats,
 		MessageComposes: queryResults,
 	})
+}
+
+type WebsocketEvent interface {
+}
+
+type WebsocketInitEvent struct {
+	Uid  string `json:"uid"`
+	Type string `json:"type"`
+}
+
+type WebsocketQueryEvent struct {
+	Type    string `json:"type"`
+	Stream  string `json:"stream"`
+	Content string `json:"content"`
+}
+
+func serveWs(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	client := &Client{hub: hub, uid: uuid.New().String(), conn: conn, send: make(chan WebsocketEvent, 256), readShutdown: make(chan struct{}, 1), writeShutdown: make(chan struct{}, 1)}
+	client.hub.register <- client
+
+	client.send <- WebsocketInitEvent{Uid: client.uid, Type: "init"}
+	background("writePump", client.writePump)
+	background("readPump", client.readPump)
 }
 
 func readInt(qs url.Values, key string, defaultValue int) int {

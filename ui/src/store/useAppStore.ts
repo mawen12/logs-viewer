@@ -1,4 +1,3 @@
-import { getDefaultServer } from "@/utils/default-server-url";
 import { create } from "zustand";
 
 type AppStore = {
@@ -11,7 +10,7 @@ type AppStore = {
 }
 
 export const useAppStore = create<AppStore>((set) => ({
-    serverUrl: getDefaultServer(),
+    serverUrl: document.location.host,
     setServerUrl: (serverUrl: string) => set({serverUrl}),
     direction: "tabs",
     setDirection: (direction: "line" | "tabs") => set({ direction }),

@@ -3,12 +3,11 @@ run_awk_index_script () {
     '$awk_funcs'
 
     BEGIN {
-      if ("'$lastTimeStr'" != "") {
-        dateHHMM = substr("'$lastTimeStr'", 0, 17);
-      } else {
-        dateHHMM = ""
-      }
+      dateHHMM = "'$lastTimeStr'"
 
+      print "N:awk_index:lastTimeStr is '$lastTimeStr'"  
+      print "N:awk_index:last_linenr is '$last_linenr'"
+      print "N:awk_index:last_bytenr is '$last_bytenr'"
       print "N:awk_index:dateHHMM is " dateHHMM
       
       bytenr_next = 1;
@@ -53,6 +52,7 @@ build_index() {
   fi
 
   local total_size=$(get_file_size $logfile) || exit 1
+  echo "N:$logfile file size is $total_size"
 
   if [ -s $indexfile ]; then # append index
     echo "p:stage:$STAGE_INDEX_APPEND:indexing up" 1>&2
@@ -60,7 +60,6 @@ build_index() {
     local lastTimeStr="$(tail -n 1 $indexfile | cut -f2)"
     local last_linenr="$(tail -n 1 $indexfile | cut -f3)"
     local last_bytenr="$(tail -n 1 $indexfile | cut -f4)"
-    local size_to_index=$((total_size-last_bytenr))
 
     eval tail -c +$last_bytenr $logfile | \
       lastTimeStr=$lastTimeStr \

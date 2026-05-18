@@ -158,9 +158,11 @@ func (r *Reader) Query(ctx context.Context, param QueryParam) []MessageCompose {
 	execute := func(ctx context.Context, c Conn) (*MessageCompose, error) {
 		var newConn Conn
 		if r.mode != "single" {
+			hub.QueryNotify(ctx, c.Url().stream, "use non-single mode to query")
 			var err error
 			newConn, err = c.NewInstance()
 			if err != nil {
+				hub.QueryNotify(ctx, c.Url().stream, fmt.Sprintf("newInstance err: %v", err))
 				return nil, err
 			}
 			defer newConn.Close() // once conn need to be closed after used
@@ -193,10 +195,13 @@ func (r *Reader) parallelExecute(ctx context.Context, execute executer) []Messag
 
 			msg, err := execute(ctx, conn)
 			if err != nil {
+				hub.QueryNotify(ctx, conn.Url().stream, fmt.Sprintf("execute err: %v", err))
 				log.Println("execute err", err)
 				msg = &MessageCompose{
 					Errs: []error{err},
 				}
+			} else {
+				hub.QueryNotify(ctx, conn.Url().stream, fmt.Sprintf("execute:%s", msg))
 			}
 			msg.Stream = conn.Url().stream
 			retChan <- *msg

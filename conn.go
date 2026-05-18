@@ -20,6 +20,8 @@ import (
 var (
 	//go:embed scripts/startup.sh.tmpl
 	startShTemplate string
+	//go:embed scripts/index.sh.tmpl
+	indexShTemplate string
 	//go:embed scripts/query.sh.tmpl
 	queryShTemplate string
 	//go:embed scripts/clean.sh.tmpl
@@ -224,6 +226,7 @@ type Conn interface {
 	Url() ParsedUrl
 	NewInstance() (Conn, error)
 	Start(context.Context) (*MessageCompose, error)
+	Index(context.Context) (*MessageCompose, error)
 	Query(context.Context, QueryParam) (*MessageCompose, error)
 	Clean(context.Context) (*MessageCompose, error)
 	Close()
@@ -289,6 +292,24 @@ func (conn *CommonConn) Start(ctx context.Context) (*MessageCompose, error) {
 	return conn.receive(ctx)
 }
 
+func (conn *CommonConn) Index(ctx context.Context) (*MessageCompose, error) {
+	params := map[string]any{
+		"PrefixPath": conn.prefixPath,
+		"AgentPath":  "agent.sh",
+		"IndexFile":  conn.indexFile,
+		"LogFile":    conn.url.log,
+	}
+	bs, err := conn.template(indexShTemplate, params)
+	if err != nil {
+		return nil, err
+	}
+	if _, err = conn.stdin.Write(bs); err != nil {
+		return nil, err
+	}
+
+	return conn.receive(ctx)
+}
+
 func (conn *CommonConn) Query(ctx context.Context, param QueryParam) (*MessageCompose, error) {
 	params := map[string]any{
 		"AgentPath":    fmt.Sprintf("%s/%s", conn.prefixPath, "agent.sh"),
@@ -308,6 +329,7 @@ func (conn *CommonConn) Query(ctx context.Context, param QueryParam) (*MessageCo
 	if err != nil {
 		return nil, err
 	}
+	hub.QueryNotify(ctx, conn.Url().stream, fmt.Sprintf("query script: %s", string(bs)))
 	if _, err = conn.stdin.Write(bs); err != nil {
 		return nil, err
 	}
@@ -389,6 +411,7 @@ Loop:
 			case *ExtRet:
 				conn.exts[ret.Key] = ret.Value
 			case *DebugRet:
+				hub.QueryNotify(ctx, conn.Url().stream, fmt.Sprintf("debug:%s", ret.Message))
 				log.Println("[DEBUG-stdout]", ret.Message)
 			case *UnknownRet:
 				log.Println("[UNKNOWN]", ret)

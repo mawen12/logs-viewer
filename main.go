@@ -24,6 +24,7 @@ var (
 	file   *os.File
 	reader *Reader
 	group  Group
+	hub    *Hub
 )
 
 type Group struct {
@@ -116,60 +117,14 @@ func main() {
 		port: uint32(*port),
 	}
 
+	hub = newHub()
+	background("hub run", hub.run)
+
 	err := serve(config)
 	if err != nil {
 		panic(err)
 	}
-
-	// from, err := time.Parse(LayoutDateTimeMinuteDash, "2026-05-13-11:47")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// to, err := time.Parse(LayoutDateTimeMinuteDash, "2026-05-13-12:47")
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// param := QueryParam{
-	// 	Pattern:     "/INFO/",
-	// 	From:        from,
-	// 	To:          to,
-	// 	MaxNumLines: 1,
-	// }
-	// rets := reader.Query(ctx, param)
-	// print(rets)
-
-	// param = QueryParam{
-	// 	Pattern:     "/INFO/",
-	// 	MaxNumLines: 2,
-	// }
-	// rets = reader.Query(ctx, param)
-	// print(rets)
-
-	// param = QueryParam{
-	// 	Pattern:     "/INFO/",
-	// 	MaxNumLines: 1,
-	// 	LineUtil:    22,
-	// }
-	// rets = reader.Query(ctx, param)
-	// print(rets)
-
-	// fmt.Println("start clean the message")
-	// rets = reader.Clean(ctx)
-	// print(rets)
 }
-
-// func print(rets []MessageComposeAndErr) {
-// 	for _, ret := range rets {
-// 		if ret.Err != nil {
-// 			fmt.Println("[ERROR]", ret.Err)
-// 		} else {
-// 			for _, log := range ret.MessageCompose.Logs {
-// 				fmt.Printf("[%s] %d:%s\n", log.stream, log.num, log.message)
-// 			}
-// 		}
-// 	}
-// }
 
 func background(name string, fn func()) {
 	group.Add(1)

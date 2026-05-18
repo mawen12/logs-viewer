@@ -98,10 +98,16 @@ if [[ "${command}" == "" ]]; then
   exit 1
 fi
 
+source "$(dirname "${BASH_SOURCE[0]}")/agent_index.sh"
+
 case "${command}" in 
   query)
     shift
     ;;
+  index)
+    build_index || exit 1
+    exit 0
+    ;;  
   logstream_info)
     host_timezone="$(detect_timezone)"
     if [[ $? == 0 ]]; then
@@ -140,7 +146,6 @@ if [[ $indexfile == "" ]]; then
   exit 1
 fi
 
-source "$(dirname "${BASH_SOURCE[0]}")/agent_index.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/agent_search.sh"
 
 user_pattern=$1

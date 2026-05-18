@@ -1,0 +1,35 @@
+(
+trap 'echo "Z:" 1>&2; echo "Z:"' EXIT
+
+echo 'A:'
+echo 'A:' 1>&2
+
+echo 'N:start index {{ .LogFile }} to {{ .PrefixPath }}/{{ .IndexFile }}'
+
+cd
+
+if [ ! -d {{ .PrefixPath }} ]; then
+    echo 'E:1:Dir {{.PrefixPath}} not exists' 1>&2
+    exit 1
+fi
+echo 'N:check {{ .PrefixPath }} success'
+if [ ! -f {{ .LogFile }} ]; then
+    echo 'E:1:File {{.LogFile}} not exists' 1>&2
+    exit 1
+fi
+echo 'N:check {{ .LogFile }} success'
+if [ -f {{ .IndexFile }} ]; then
+    rm -f {{ .IndexFile }}
+fi
+
+cd {{ .PrefixPath }}
+
+bash {{ .AgentPath }} index --index-file {{ .IndexFile }} --logfile {{ .LogFile }}
+
+if [ $? -ne 0 ]; then
+  echo 'E:1:index failed' 1>&2
+  exit 1
+else 
+  echo 'N:index ok'
+fi
+)
