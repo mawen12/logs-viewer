@@ -1,17 +1,28 @@
 import { useSnack } from "@/contexts/SnackbarProvider";
-import type { ReactNode } from "node_modules/@types/react";
+import type { ReactNode } from "react";
 
 export function useCopyToClipboard() {
     const { showInfoMessage } = useSnack();
 
     return async(text: string, msgInfo: string | ReactNode) => {
         if (!navigator?.clipboard) {
-            showInfoMessage({
-                text: "Clipboard API not supported",
-                type: "error",
-                timeout: 20000,
-            })
-            return false;
+            try {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textarea);
+
+                return successful;
+            } catch (err) {
+                console.warn('Copy failed', err);
+                return false;
+            }
         }
 
         try {
