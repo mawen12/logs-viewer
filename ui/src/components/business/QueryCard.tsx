@@ -1,21 +1,26 @@
 import type { FetchLogsParams } from "@/api/type";
+import type { WebsocketEvent } from "@/contexts/WebsocketProvider";
+import { useWebsocketStore, type WebsocketQueryEvent } from "@/hooks/useWebsocketStore";
 import { useAppStore } from "@/store/useAppStore";
+import { useDebugStore } from "@/store/useDebugStore";
 import { useLogStore } from "@/store/useLogStore";
 import { useQueryStore } from "@/store/useQueryStore";
 import { useTimeStore } from "@/store/useTimeStore";
 import { strToDateTimeMinuteDash } from "@/utils/TimeUtils";
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge } from "../ui/badge";
 import { Card, CardContent } from "../ui/card";
+import { Checkbox } from "../ui/checkbox";
+import { Field } from "../ui/field";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { ExecuteButton } from "./ExecuteButton";
 
 export function QueryCard() {
     const { type, range, timeParams } = useTimeStore();
-    const {query, setQuery, limit, setLimit} = useQueryStore();
+    const { query, setQuery, limit, setLimit } = useQueryStore();
 
-    const {serverUrl} = useAppStore();
+    const { serverUrl } = useAppStore();
     const { fetchLogs } = useLogStore();
     const { loading, durationMs, messageComposes, stats } = useLogStore();
 
@@ -53,9 +58,36 @@ export function QueryCard() {
         }
     }
 
+    const { setDebug } = useAppStore();
+    const { uid, register, unregister } = useWebsocketStore();
+    const { append, clearAll } = useDebugStore();
+
+    const [debugChecked, setDebugChecked] = useState<boolean>(false);
+
     const handleQuery = (refresh: boolean = false) => {
-        fetchLogs(serverUrl, getParams(refresh))
+        if (debugChecked) {
+            setDebug(true);
+            clearAll();
+            fetchLogs(serverUrl, uid, getParams(refresh))
+        } else {
+            fetchLogs(serverUrl, "", getParams(refresh))
+        }
     }
+
+    const handler = useCallback((event: WebsocketEvent) => {
+        const queryEvent = event as WebsocketQueryEvent;
+        append(queryEvent.stream, queryEvent.content);
+    }, [append]);
+
+    useEffect(() => {
+        if (!debugChecked) return;
+        register("query", handler)
+
+        return () => {
+            unregister("query", handler)
+            clearAll();
+        }
+    }, [debugChecked, register, handler, unregister, clearAll]);
 
     return (
         <Card className="flex-none">
@@ -82,11 +114,15 @@ export function QueryCard() {
                         <Badge variant={"outline"} className="text-gray-500">Fetched Count: {fetchedCount}</Badge>
                         <Badge variant={"outline"} className="text-gray-500">Matched Count: {matchedCount}</Badge>
 
-                        <div className="ml-auto">
+                        <div className="ml-auto flex flex-row gap-2">
+                            <Field orientation="horizontal">
+                                <Checkbox id="debug" checked={debugChecked} onCheckedChange={(e) => setDebugChecked(e as boolean)} />
+                                <Label htmlFor="debug">Debug</Label>
+                            </Field>
+
                             <ExecuteButton loading={loading} handleQuery={handleQuery} />
                         </div>
                     </div>
-
                 </div>
             </CardContent>
         </Card>

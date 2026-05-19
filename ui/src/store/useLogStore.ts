@@ -13,7 +13,7 @@ type LogStore = {
     setStats: (stats: Stat[]) => void,
     durationMs: number,
     setDurationMs: (duration: number) => void,
-    fetchLogs: (serverUrl: string, params: FetchLogsParams) => Promise<void>,
+    fetchLogs: (serverUrl: string, uid: string, params: FetchLogsParams) => Promise<void>,
 }
 
 export const useLogStore = create<LogStore>((set) => ({
@@ -27,10 +27,10 @@ export const useLogStore = create<LogStore>((set) => ({
     setStats: (stats: Stat[]) => set({ stats }),
     durationMs: 0,
     setDurationMs: (duration: number) => set({ durationMs: duration }),
-    fetchLogs: async (serverUrl: string, params: FetchLogsParams): Promise<void> => {
+    fetchLogs: async (serverUrl: string,  uid: string,params: FetchLogsParams): Promise<void> => {
         try {
             set({ loading: true });
-            const url = getLogsUrl(serverUrl, params);
+            const url = getLogsUrl(serverUrl, uid, params);
             const response = await fetch(url);
 
             const data = await response.json();
@@ -64,13 +64,13 @@ export const useLogStore = create<LogStore>((set) => ({
     },
 }))
 
-const getLogsUrl = (server: string, params: FetchLogsParams) => {
+const getLogsUrl = (server: string, uid: string, params: FetchLogsParams) => {
     const query = params.query || "";
     const limit = params.limit.toString() || "1";
     const from = params.from || "";
     const to = params.to || "";
     const refresh = params.refresh  ?  "true" : "false";
 
-    const ps = new URLSearchParams({ query, limit, from, to, refresh })
+    const ps = new URLSearchParams({ query, limit, from, to, refresh, uid })
     return `${server}/query?${ps.toString()}`
 }

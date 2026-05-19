@@ -98,6 +98,9 @@ func routes(config serverConfig) http.Handler {
 			done, total := group.Progress()
 			return fmt.Sprintf("%d/%d", done, total)
 		}))
+		expvar.Publish("websockets", expvar.Func(func() any {
+			return len(hub.clients)
+		}))
 		mux.HandleFunc("GET /debug/vars", expvar.Handler().ServeHTTP)
 	}
 
@@ -138,7 +141,6 @@ func logRequest(next http.Handler) http.Handler {
 func uidWebsocket(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		uid := r.URL.Query().Get("uid")
-		fmt.Println("uid is", uid)
 		ctx := context.WithValue(r.Context(), "uid", uid)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -151,7 +153,7 @@ func crossOrigin(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token, Authorization, Token,X-Token,X-User-Id,X-Requested-With, Uid")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS,DELETE,PUT")
 		w.Header().Set("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type, Logs-Viewer-Cost-Ms, Uid")
-		// w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		next.ServeHTTP(w, r)
 	})
@@ -232,7 +234,14 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := &Client{hub: hub, uid: uuid.New().String(), conn: conn, send: make(chan WebsocketEvent, 256), readShutdown: make(chan struct{}, 1), writeShutdown: make(chan struct{}, 1)}
+	client := &Client{
+		hub:           hub,
+		uid:           uuid.New().String(),
+		conn:          conn,
+		send:          make(chan WebsocketEvent, 1024),
+		readShutdown:  make(chan struct{}, 1),
+		writeShutdown: make(chan struct{}, 1),
+	}
 	client.hub.register <- client
 
 	client.send <- WebsocketInitEvent{Uid: client.uid, Type: "init"}

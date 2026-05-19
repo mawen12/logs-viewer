@@ -411,7 +411,7 @@ Loop:
 			case *ExtRet:
 				conn.exts[ret.Key] = ret.Value
 			case *DebugRet:
-				hub.QueryNotify(ctx, conn.Url().stream, fmt.Sprintf("debug:%s", ret.Message))
+				hub.QueryNotify(ctx, conn.Url().stream, ret.Message)
 				log.Println("[DEBUG-stdout]", ret.Message)
 			case *UnknownRet:
 				log.Println("[UNKNOWN]", ret)
@@ -474,9 +474,9 @@ func (conn *CommonConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 				log.Println("receve err or empty from stdoutbuf", err, line)
 				return
 			}
-			if *debug {
-				fmt.Print("[STDOUT]", line)
-			}
+			// if *debug {
+			// 	fmt.Print("[STDOUT]", line)
+			// }
 
 			line = strings.TrimRight(line, "\r\n")
 
@@ -534,9 +534,9 @@ func (conn *CommonConn) StderrReceive(ctx context.Context) chan RetAndErr {
 				log.Println("receve err or empty from stderrBuf", err, line)
 				return
 			}
-			if *debug {
-				fmt.Print("[STDERR]", line)
-			}
+			// if *debug {
+			// 	fmt.Print("[STDERR]", line)
+			// }
 
 			line = strings.TrimRight(line, "\r\n")
 

@@ -1,4 +1,3 @@
-import type { Log } from "@/api/type";
 import { useAppStore } from "@/store/useAppStore";
 import { useMemo } from "react";
 
@@ -9,7 +8,13 @@ const levelColors = {
     // DEBUG: "text-blue-500",
 }
 
-export function SimpleLog({ level, message }: Log) {
+export interface SimpleLogProps {
+    message: string
+    level?: string,
+    className?: string,
+}
+
+export function SimpleLog({ level, message, className }: SimpleLogProps) {
     const normalizedMessage = useMemo(() => {
         return message
             .replace(/\r\n/g, "\n")
@@ -27,7 +32,7 @@ export function SimpleLog({ level, message }: Log) {
     }, [level, colorful])
 
     return (
-        <span className={`block w-full text-[11px] font-mono leading-snug whitespace-pre-wrap [overflow-wrap:anywhere] ${color}`}>
+        <span className={`block w-full text-[11px] font-mono leading-snug whitespace-pre-wrap [overflow-wrap:anywhere] ${color} ${className}`}>
             {normalizedMessage}
         </span>
 

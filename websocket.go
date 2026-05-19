@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -63,23 +62,10 @@ func (c *Client) readPump() {
 		return nil
 	})
 
-	for {
-		select {
-		case <-c.readShutdown:
-			fmt.Println("receive read shutdown")
-			needUnregister = false
-			return
-		default:
-			_, _, err := c.conn.ReadMessage()
-			if err != nil {
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					log.Printf("error: %v", err)
-				}
-				return
-			}
-			// message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-			// c.hub.broadcast <- message
-		}
+	for range c.readShutdown {
+		fmt.Println("receive read shutdown")
+		needUnregister = false
+		return
 	}
 }
 
@@ -116,7 +102,7 @@ func (c *Client) writePump() {
 		case <-c.writeShutdown:
 			fmt.Println("receive write shutdown")
 			return
-		default:
+		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
@@ -142,7 +128,7 @@ type WebsocketEventWrapper struct {
 
 func newHub() *Hub {
 	return &Hub{
-		broadcast:  make(chan WebsocketEventWrapper, 10),
+		broadcast:  make(chan WebsocketEventWrapper, 1024),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		ids:        make(map[string]*Client),
@@ -159,10 +145,6 @@ func (h *Hub) QueryNotify(ctx context.Context, stream, content string) {
 			Content: content,
 		}}
 	}
-}
-
-func (h *Hub) Notify(uid string, event WebsocketQueryEvent) {
-	h.broadcast <- WebsocketEventWrapper{uid: uid, WebsocketEvent: event}
 }
 
 func (h *Hub) Close() {
@@ -186,15 +168,13 @@ func (h *Hub) run() {
 				close(client.send)
 			}
 		case message := <-h.broadcast:
-			for client := range h.clients {
-				if client.uid == message.uid {
-					select {
-					case client.send <- message.WebsocketEvent:
-					default:
-						close(client.send)
-						delete(h.clients, client)
-						delete(h.ids, client.uid)
-					}
+			if client, ok := h.ids[message.uid]; ok {
+				select {
+				case client.send <- message.WebsocketEvent:
+				default:
+					close(client.send)
+					delete(h.clients, client)
+					delete(h.ids, client.uid)
 				}
 			}
 		case <-h.shutdown:
