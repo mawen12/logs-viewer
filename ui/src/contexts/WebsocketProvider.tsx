@@ -1,6 +1,4 @@
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useWebsocketStore } from "@/hooks/useWebsocketStore";
-import { IconAlertCircle } from '@tabler/icons-react';
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 type WebsocketProviderProps = {
@@ -11,7 +9,13 @@ export interface WebsocketEvent {
     type: string
 }
 
-const WebsocketContext = createContext<WebSocket | undefined>(undefined);
+export interface WebsocketContextProps {
+    ws: WebSocket | undefined,
+    status: WsStatus,
+    err: Event | null
+}
+
+const WebsocketContext = createContext<WebsocketContextProps>({ws: undefined, status: "closed", err: null});
 
 type WsStatus = "connecting" | "open" | "closing" | "closed";
 
@@ -61,17 +65,13 @@ export function WebsocketProvider({ children }: WebsocketProviderProps) {
         }
     }, [connect, ws]);
 
-    return <WebsocketContext.Provider value={ws}>
-        {err && (
-            <Alert variant="destructive" className="max-w-md">
-                <IconAlertCircle />
-                <AlertTitle>Websocket {status}</AlertTitle>
-                <AlertDescription>
-                    {JSON.stringify(err)}
-                </AlertDescription>
-            </Alert>
-        )
-        }
+    const value = {
+        ws,
+        status,
+        err
+    }
+
+    return <WebsocketContext.Provider value={value}>
         {children}
     </WebsocketContext.Provider>
 }

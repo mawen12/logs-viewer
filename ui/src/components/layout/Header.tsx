@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeProvider";
 import { IconBrightness } from '@tabler/icons-react';
 import { TimeFilter } from "../business/TimeFilter";
+import { WebsocketButton } from "../business/WebsocketButton";
+
 
 export function Header() {
     const { toggleTheme } = useTheme();
@@ -13,6 +15,8 @@ export function Header() {
             </div>
 
             <div className="ml-auto flex items-center gap-2">
+                <WebsocketButton/>
+
                 <TimeFilter />
 
                 <Button variant="outline" size="icon-sm" onClick={() => toggleTheme()} >

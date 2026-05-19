@@ -200,8 +200,6 @@ func (r *Reader) parallelExecute(ctx context.Context, execute executer) []Messag
 				msg = &MessageCompose{
 					Errs: []error{err},
 				}
-			} else {
-				hub.QueryNotify(ctx, conn.Url().stream, fmt.Sprintf("execute:%s", msg))
 			}
 			msg.Stream = conn.Url().stream
 			retChan <- *msg

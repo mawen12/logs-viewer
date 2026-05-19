@@ -1,8 +1,8 @@
+import type { MessageCompose } from "@/api/type";
 import { MoreHorizontalIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { ButtonGroup } from "../ui/button-group";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
-import type { MessageCompose } from "@/api/type";
 
 export type DataType = MessageCompose
 
@@ -15,6 +15,10 @@ export interface DataButtonGroupProps {
 }
 
 export function DataButtonGroup({data, active, setActive, desc, isDisabled}: DataButtonGroupProps) {
+    
+    if (active < 0) {
+        return null;
+    }
 
     return (
         <ButtonGroup>
