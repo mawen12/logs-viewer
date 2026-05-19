@@ -3,13 +3,10 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
 	"sync"
 	"sync/atomic"
 	"time"
-
-	"os"
 )
 
 var (
@@ -21,7 +18,7 @@ var (
 )
 
 var (
-	file   *os.File
+	logger *Logger
 	reader *Reader
 	group  Group
 	hub    *Hub
@@ -62,11 +59,7 @@ func main() {
 			reader.Close()
 		}
 
-		fmt.Println("close reader success")
-
-		if file != nil {
-			file.Close()
-		}
+		logger.Close()
 	}()
 
 	flag.Parse()
@@ -75,27 +68,15 @@ func main() {
 		panic("config file must provided")
 	}
 
-	if logfile != nil {
-		if err := os.MkdirAll("logs", 0755); err != nil {
-			log.Printf("Failed to create log directory: %v", err)
-		} else {
-			dir, err := os.Getwd()
-			if err != nil {
-				log.Printf("Failed to access directory: %v", err)
-			} else {
-				file, err = os.OpenFile(fmt.Sprintf("%s/logs/%s", dir, *logfile), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-				if err != nil {
-					log.Printf("Failed to open log file: %v", err)
-				} else {
-					log.SetOutput(file)
-				}
-			}
-		}
+	var err error
+	logger, err = NewLogger(*logfile)
+	if err != nil {
+		log.Fatalf("New logger: %v", err)
 	}
 
 	reader = NewReader(*configPath, *mode)
 	if err := reader.LoadConfig(); err != nil {
-		panic(err)
+		log.Fatalf("Load config: %v", err)
 	}
 
 	if *debug {
@@ -103,15 +84,12 @@ func main() {
 	}
 
 	if err := reader.ParseConfig(); err != nil {
-		panic(err)
+		log.Fatalf("Parse config: %v", err)
 	}
 
-	ctx := context.Background()
-	if err := reader.Connect(ctx); err != nil {
-		panic(err)
+	if err := reader.Connect(context.Background()); err != nil {
+		log.Fatalf("Connect: %v", err)
 	}
-
-	log.Println("Connect success")
 
 	config := serverConfig{
 		port: uint32(*port),
@@ -120,9 +98,8 @@ func main() {
 	hub = newHub()
 	background("hub run", hub.run)
 
-	err := serve(config)
-	if err != nil {
-		panic(err)
+	if err := serve(config); err != nil {
+		log.Fatalf("Start serve: %v", err)
 	}
 }
 
