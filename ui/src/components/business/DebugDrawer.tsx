@@ -41,7 +41,7 @@ export function DebugDrawer() {
                     </TooltipContent>
                 </Tooltip>
             </DrawerTrigger>
-            <DrawerContent>
+            <DrawerContent title="Debug info" aria-description="Show current query debug info">
                 <ScrollArea className="h-full overflow-auto">
                     {Object.entries(debugs).map(([key, values]) => (
                         <Collapsible key={key} className="border rounded-md w-full" open={name === key} onOpenChange={(open) => toggleName(open, key)}>

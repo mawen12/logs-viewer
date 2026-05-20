@@ -67,7 +67,7 @@ export function CopyButton() {
                 </Button>
 
             </TooltipTrigger>
-            <TooltipContent side="bottom">
+            <TooltipContent>
                 Copy logs
             </TooltipContent>
         </Tooltip>

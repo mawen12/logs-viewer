@@ -29,9 +29,6 @@ export function WebsocketButton() {
     return (
         <Tooltip>
             <TooltipTrigger asChild className="cursor-pointer">
-                {/* <Button variant="outline" size="icon-sm" className={`${iconColor}`}>
-                    {isOpen ? <IconPlug /> : <IconPlugX />}
-                </Button> */}
                 {isOpen ? <IconPlug className={`${iconColor} size-4 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg`} /> : <IconPlugX className={`${iconColor} size-4 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg`} />}
             </TooltipTrigger>
             <TooltipContent>
@@ -51,9 +48,6 @@ export function WebsocketButton() {
                         </div>
                     )}
                 </div>
-
-
-
             </TooltipContent>
         </Tooltip>
     )
