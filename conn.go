@@ -383,7 +383,11 @@ Loop:
 		case retAndErr, ok := <-stdoutChan:
 			if !ok {
 				log.Println("receive stdoutchan not ok")
-				break Loop
+				stdoutEnd = true
+				if stderrEnd {
+					break Loop
+				}
+				continue
 			}
 			if retAndErr.Err != nil {
 				return nil, retAndErr.Err
@@ -427,7 +431,11 @@ Loop:
 		case retAndErr, ok := <-stderrChan:
 			if !ok {
 				log.Println("receive stderrchan not ok")
-				break Loop
+				stderrEnd = true
+				if stdoutEnd {
+					break Loop
+				}
+				continue
 			}
 			if retAndErr.Err != nil {
 				return nil, retAndErr.Err
@@ -466,56 +474,31 @@ type RetAndErr struct {
 }
 
 func (conn *CommonConn) StdoutReceive(ctx context.Context) chan RetAndErr {
-	retChan := make(chan RetAndErr, 10)
+	retChan := make(chan RetAndErr, 128)
 
 	background("stdout-recevie", func() {
 		defer close(retChan)
 		for {
 			line, err := conn.stdoutBuf.ReadString('\n')
-			if err != nil || line == "" {
-				log.Println("receve err or empty from stdoutbuf", err, line)
+			if err != nil && line == "" {
+				log.Println("receve err and empty from stdoutbuf", err, line)
 				return
-			}
-
-			line = strings.TrimRight(line, "\r\n")
-
-			var ret Ret
-			switch line[0] {
-			case 'A':
-				ret = &BeginRet{}
-				line = line[1:]
-			case 'Z':
-				ret = &EndRet{}
-				err = ret.Decode([]byte(line[1:]))
-				retChan <- RetAndErr{Err: err, Ret: ret}
+			} else if err != nil && line != "" {
+				log.Println("receve err and non-empty from stdoutbuf", err, line)
+				line = strings.TrimLeft(line, "\u0000")
+				handleRecevie(ctx, retChan, line, err)
 				return
-			case 'E':
-				ret = &ErrRet{}
-				line = line[1:]
-			case 'D':
-				ret = &DataRet{}
-				line = line[1:]
-			case 'T':
-				ret = &StatRet{}
-				line = line[1:]
-			case 'X':
-				ret = &ExtRet{}
-				line = line[1:]
-			case 'N':
-				ret = &DebugRet{}
-				line = line[1:]
-			default:
-				ret = &UnknownRet{}
+			} else if line == "" {
+				log.Println("read empty line from stdoutbuf")
+			} else {
+				line = strings.TrimLeft(line, "\u0000")
+
+				log.Println("handle stdout", line)
+				if exit := handleRecevie(ctx, retChan, line, nil); exit {
+					log.Println("exit stdout")
+					return
+				}
 			}
-
-			err = ret.Decode([]byte(line))
-
-			select {
-			case <-ctx.Done():
-				return
-			case retChan <- RetAndErr{Err: err, Ret: ret}:
-			}
-
 		}
 	})
 
@@ -523,51 +506,105 @@ func (conn *CommonConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 }
 
 func (conn *CommonConn) StderrReceive(ctx context.Context) chan RetAndErr {
-	retChan := make(chan RetAndErr, 10)
+	retChan := make(chan RetAndErr, 128)
 
 	background("stderr-receive", func() {
 		defer close(retChan)
 		for {
 			line, err := conn.stderrBuf.ReadString('\n')
-			if err != nil || line == "" {
-				log.Println("receve err or empty from stderrBuf", err, line)
+			if err != nil && line == "" {
+				log.Println("receve err and empty from stderrbuf", err, line)
 				return
-			}
-
-			line = strings.TrimRight(line, "\r\n")
-
-			var ret Ret
-			switch line[0] {
-			case 'A':
-				ret = &BeginRet{}
-				line = line[1:]
-			case 'Z':
-				ret = &EndRet{}
-				err = ret.Decode([]byte(line[1:]))
-				retChan <- RetAndErr{Err: err, Ret: ret}
+			} else if err != nil && line != "" {
+				log.Println("receve err and non-empty from stderrbuf", err, line)
+				line = strings.TrimLeft(line, "\u0000")
+				handleRecevie(ctx, retChan, line, err)
 				return
-			case 'E':
-				ret = &ErrRet{}
-				line = line[1:]
-			case 'D':
-				ret = &DataRet{}
-				line = line[1:]
-			case 'N':
-				ret = &DebugRet{}
-				line = line[1:]
-			default:
-				ret = &UnknownRet{}
+			} else if line == "" {
+				log.Println("read empty line from stderrbuf")
+			} else {
+				line = strings.TrimLeft(line, "\u0000")
+				if exit := handleRecevie(ctx, retChan, line, nil); exit {
+					return
+				}
 			}
-
-			err = ret.Decode([]byte(line))
-			select {
-			case <-ctx.Done():
-				return
-			case retChan <- RetAndErr{Err: err, Ret: ret}:
-			}
-
 		}
 	})
 
 	return retChan
+}
+
+func handleRecevie(ctx context.Context, retChan chan RetAndErr, line string, err error) (exist bool) {
+	line = strings.TrimRight(line, "\r\n")
+	errs := make([]error, 0)
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	var ret Ret
+	switch line[0] {
+	case 'A':
+		ret = &BeginRet{}
+		line = line[1:]
+	case 'Z':
+		log.Println("received end ret,", line)
+		ret = &EndRet{}
+		if err := ret.Decode([]byte(line[1:])); err != nil {
+			errs = append(errs, err)
+		}
+		retChan <- RetAndErr{Err: combineErrors(errs), Ret: ret}
+		exist = true
+		return
+	case 'E':
+		ret = &ErrRet{}
+		line = line[1:]
+	case 'D':
+		ret = &DataRet{}
+		line = line[1:]
+	case 'T':
+		ret = &StatRet{}
+		line = line[1:]
+	case 'X':
+		ret = &ExtRet{}
+		line = line[1:]
+	case 'N':
+		ret = &DebugRet{}
+		line = line[1:]
+	default:
+		ret = &UnknownRet{}
+	}
+
+	if err := ret.Decode([]byte(line)); err != nil {
+		errs = append(errs, err)
+	}
+
+	select {
+	case <-ctx.Done():
+		log.Println("context done, exit the stdout and stdin receive")
+		exist = true
+	case retChan <- RetAndErr{Err: combineErrors(errs), Ret: ret}:
+
+	}
+
+	return exist
+}
+
+func combineErrors(errs []error) error {
+	if len(errs) == 0 {
+		return nil
+	}
+
+	var msgs []string
+	for _, err := range errs {
+		if err != nil {
+			msgs = append(msgs, err.Error())
+		}
+	}
+
+	if len(msgs) == 0 {
+		return nil
+	}
+
+	return errors.New(strings.Join(msgs, "; "))
+
 }

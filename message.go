@@ -81,7 +81,7 @@ func (r *BeginRet) Decode(src []byte) error {
 	// *r = BeginRet{}
 
 	if len(src) != 1 {
-		return fmt.Errorf("invalid message len for BeginRet, expected %d actual %d", 0, len(src))
+		return fmt.Errorf("invalid message len for BeginRet<%s>, expected %d actual %d", src, 0, len(src))
 	}
 
 	if src[0] != ':' {
@@ -103,7 +103,7 @@ func (r *EndRet) Decode(src []byte) error {
 	// *r = EndRet{}
 
 	if len(src) != 1 {
-		return fmt.Errorf("invalid message len for EndRet, expected %d actual %d", 0, len(src))
+		return fmt.Errorf("invalid message len for EndRet<%s>, expected %d actual %d", src, 0, len(src))
 	}
 
 	if src[0] != ':' {
@@ -127,7 +127,7 @@ func (r *ErrRet) Decode(src []byte) error {
 	// *r = ErrRet{}
 
 	if len(src) < 4 {
-		return fmt.Errorf("invalid message len for ErrRet, expected %d actual %d", 4, len(src))
+		return fmt.Errorf("invalid message len for ErrRet<%s>, expected %d actual %d", src, 4, len(src))
 	}
 
 	if src[0] != ':' {
@@ -157,7 +157,7 @@ func (r *DataRet) Decode(src []byte) error {
 	// *r = DataRet{}
 
 	if len(src) < 4 {
-		return fmt.Errorf("invalid message len for DataRet, expected %d actual %d", 4, len(src))
+		return fmt.Errorf("invalid message len for DataRet<%s>, expected %d actual %d", src, 4, len(src))
 	}
 
 	if src[0] != ':' {
@@ -193,7 +193,7 @@ func (r *StatRet) Decode(src []byte) error {
 	// *r = StatRet{}
 
 	if len(src) < 4 {
-		return fmt.Errorf("invalid message len for StatRet, expected %d actual %d", 4, len(src))
+		return fmt.Errorf("invalid message len for StatRet<%s>, expected %d actual %d", src, 4, len(src))
 	}
 
 	if src[0] != ':' {
@@ -232,7 +232,7 @@ func (r *DebugRet) Decode(src []byte) error {
 	// *r = DebugRet{}
 
 	if len(src) < 2 {
-		return fmt.Errorf("invalid message len for DebugRet, expected %d actual %d", 2, len(src))
+		return fmt.Errorf("invalid message len for DebugRet<%s>, expected %d actual %d", src, 2, len(src))
 	}
 
 	if src[0] != ':' {
@@ -257,7 +257,7 @@ func (r *ExtRet) Decode(src []byte) error {
 	// *r = ExtRet{}
 
 	if len(src) < 4 {
-		return fmt.Errorf("invalid message len for ExtRet, expected %d actual %d", 4, len(src))
+		return fmt.Errorf("invalid message len for ExtRet<%s>, expected %d actual %d", src, 4, len(src))
 	}
 
 	if src[0] != ':' {

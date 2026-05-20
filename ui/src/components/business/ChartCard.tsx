@@ -15,7 +15,7 @@ export function ChartCard() {
     }
 
     return (
-        <Card className="flex-none ">
+        <Card className="flex-none gap-0 py-2">
             <CardHeader>
                 <div className="flex flex-row ml-auto gap-2">
                     <Button variant="outline" size="icon-sm" onClick={toggleShow} >

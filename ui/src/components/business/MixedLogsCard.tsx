@@ -8,7 +8,7 @@ import { ComposeLogs } from "./ComposeLogs";
 import { CopyButton } from "./CopyButton";
 import { DataButtonGroup } from "./DataButtonGroup";
 import { DirectionButton } from "./DirectionButton";
-import { DebugButton } from "./DebugButton";
+import { DebugDrawer } from "./DebugDrawer";
 
 export function MixedLogsCard() {
     const { direction } = useAppStore();
@@ -43,7 +43,7 @@ export function MixedLogsCard() {
     }
 
     return (
-        <div className="group/card flex flex-col gap-4 rounded-xl bg-card py-4 text-sm text-card-foreground ring-1 ring-foreground/10 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl">
+        <div className="group/card flex flex-col rounded-xl bg-card py-2 text-sm text-card-foreground ring-1 ring-foreground/10 has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl">
             <div className="sticky top-0 z-[3] bg-card group/card-header @container/card-header  items-start gap-1 rounded-t-xl px-4 group-data-[size=sm]/card:px-3 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-4 group-data-[size=sm]/card:[.border-b]:pb-3">
                 <div className="flex flex-row ml-auto gap-2 items-center h-[41.5px]">
                     <div>
@@ -52,7 +52,7 @@ export function MixedLogsCard() {
                         )}
                     </div>
                     <div className="ml-auto flex items-center gap-2">
-                        <DebugButton/>
+                        <DebugDrawer/>
                         <ColorfulButton />
                         <CopyButton />
                         <DirectionButton />

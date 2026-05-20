@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -156,6 +157,11 @@ func (r *Reader) Connect(ctx context.Context) error {
 
 func (r *Reader) Query(ctx context.Context, param QueryParam) []MessageCompose {
 	execute := func(ctx context.Context, c Conn) (*MessageCompose, error) {
+		start := time.Now()
+		defer func() {
+			hub.QueryNotify(ctx, c.Url().stream, fmt.Sprintf("query cost %dms", time.Since(start).Milliseconds()))
+		}()
+
 		var newConn Conn
 		if r.mode != "single" {
 			hub.QueryNotify(ctx, c.Url().stream, "use non-single mode to query")

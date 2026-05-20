@@ -4,6 +4,8 @@ import (
 	"context"
 	"flag"
 	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -98,6 +100,11 @@ func main() {
 	hub = newHub()
 	background("hub run", hub.run)
 
+	go func() {
+		log.Println("pprof listening on :6060")
+		log.Fatal(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 	if err := serve(config); err != nil {
 		log.Fatalf("Start serve: %v", err)
 	}
@@ -111,7 +118,7 @@ func background(name string, fn func()) {
 
 		defer func() {
 			if err := recover(); err != nil {
-				log.Println(err)
+				log.Println(name, "execute error ", err)
 			}
 			log.Println("goroutine stop for ", name)
 		}()

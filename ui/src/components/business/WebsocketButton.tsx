@@ -1,9 +1,8 @@
 import { useWebsocket } from "@/contexts/WebsocketProvider";
-import { Button } from "../ui/button";
-import { IconPlug, IconPlugX } from '@tabler/icons-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useWebsocketStore } from "@/hooks/useWebsocketStore";
+import { IconPlug, IconPlugX } from '@tabler/icons-react';
 import { useMemo } from "react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 
 export function WebsocketButton() {
@@ -29,10 +28,11 @@ export function WebsocketButton() {
 
     return (
         <Tooltip>
-            <TooltipTrigger asChild>
-                <Button variant="outline" size="icon-sm" className={`${iconColor}`}>
+            <TooltipTrigger asChild className="cursor-pointer">
+                {/* <Button variant="outline" size="icon-sm" className={`${iconColor}`}>
                     {isOpen ? <IconPlug /> : <IconPlugX />}
-                </Button>
+                </Button> */}
+                {isOpen ? <IconPlug className={`${iconColor} size-4 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg`} /> : <IconPlugX className={`${iconColor} size-4 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg`} />}
             </TooltipTrigger>
             <TooltipContent>
                 <div className="flex flex-col gap-1">

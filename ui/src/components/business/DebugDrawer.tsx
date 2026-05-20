@@ -9,7 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/colla
 import { SimpleLog } from "./SimpleLog";
 import { useState } from 'react';
 
-export function DebugButton() {
+export function DebugDrawer() {
     const { debug, setDebug } = useAppStore();
     const { debugs } = useDebugStore();
 
@@ -55,7 +55,7 @@ export function DebugButton() {
                                     )}
                                 </Button>
                             </CollapsibleTrigger>
-                            <CollapsibleContent>
+                            <CollapsibleContent className="px-2 py-1">
                                 <ScrollArea>
                                     {values.map((value) => (
                                         <SimpleLog level="" message={value} className="select-text" />
