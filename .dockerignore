@@ -1,0 +1,14 @@
+# VCS and editor files
+.git
+.gitignore
+.vscode
+
+# Local outputs and runtime data
+bin
+logs
+
+# Frontend source project is not needed for backend binary build
+ui
+
+# Common JS dependency/cache folders
+**/node_modules
