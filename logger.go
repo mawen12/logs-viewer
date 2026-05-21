@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 type Logger struct {
@@ -12,11 +13,13 @@ type Logger struct {
 
 func NewLogger(logfile string) (*Logger, error) {
 	if logfile == "" {
-		logfile = "logs.log"
+		return &Logger{}, nil
 	}
 
-	if err := os.MkdirAll("logs", 0755); err != nil {
-		return nil, fmt.Errorf("Create log directory: %v", err)
+	if _, err := os.Stat("logs"); os.IsNotExist(err) {
+		if err := os.MkdirAll("logs", 0755); err != nil {
+			return nil, fmt.Errorf("Create log directory: %v", err)
+		}
 	}
 
 	dir, err := os.Getwd()
@@ -24,7 +27,14 @@ func NewLogger(logfile string) (*Logger, error) {
 		return nil, fmt.Errorf("Access log directory: %v", err)
 	}
 
-	logpath := fmt.Sprintf("%s/logs/%s", dir, logfile)
+	var logpath string
+	if strings.HasSuffix(dir, "/") {
+		logpath = fmt.Sprintf("%slogs/%s", dir, logfile)
+	} else {
+		logpath = fmt.Sprintf("%s/logs/%s", dir, logfile)
+	}
+	log.Println("logpath is", logpath)
+
 	file, err := os.OpenFile(logpath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return nil, fmt.Errorf("Open log file: %v", err)

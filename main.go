@@ -12,11 +12,11 @@ import (
 )
 
 var (
-	configPath = flag.String("config", "", "config file path")
-	logfile    = flag.String("logfile", "logs.log", "log record file")
-	port       = flag.Int("port", 9081, "server port")
-	debug      = flag.Bool("debug", false, "debug")
-	mode       = flag.String("mode", "parallel", "conn run mode")
+	configPath = flag.String("config", getEnv("CONFIG", "config.properties"), "config file path")
+	logfile    = flag.String("logfile", getEnv("LOGFILE", ""), "log record file")
+	port       = flag.Int("port", getEnvInt("PORT", 9081), "server port")
+	debug      = flag.Bool("debug", getEnvBool("DEBUG", false), "debug")
+	mode       = flag.String("mode", getEnv("MODE", "parallel"), "conn run mode")
 )
 
 var (
@@ -25,30 +25,6 @@ var (
 	group  Group
 	hub    *Hub
 )
-
-type Group struct {
-	wg    sync.WaitGroup
-	total atomic.Int64
-	done  atomic.Int64
-}
-
-func (g *Group) Add(n int) {
-	g.total.Add(1)
-	g.wg.Add(1)
-}
-
-func (g *Group) Done() {
-	g.done.Add(1)
-	g.wg.Done()
-}
-
-func (g *Group) Wait() {
-	g.wg.Wait()
-}
-
-func (g *Group) Progress() (done, total int64) {
-	return g.done.Load(), g.total.Load()
-}
 
 func main() {
 	defer func() {
@@ -126,4 +102,28 @@ func background(name string, fn func()) {
 		log.Println("goroutine start for ", name)
 		fn()
 	}()
+}
+
+type Group struct {
+	wg    sync.WaitGroup
+	total atomic.Int64
+	done  atomic.Int64
+}
+
+func (g *Group) Add(n int) {
+	g.total.Add(1)
+	g.wg.Add(1)
+}
+
+func (g *Group) Done() {
+	g.done.Add(1)
+	g.wg.Done()
+}
+
+func (g *Group) Wait() {
+	g.wg.Wait()
+}
+
+func (g *Group) Progress() (done, total int64) {
+	return g.done.Load(), g.total.Load()
 }
