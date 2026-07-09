@@ -1,14 +1,14 @@
 import type { Log } from "@/api/type";
-import { Badge } from "../ui/badge";
-import { Card, CardContent, CardHeader } from "../ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useMemo } from "react";
 
 export function CardLog(log: Log) {
 
     const normalizedMessage = useMemo(() => {
         return log.message
-                .replace(/\r\n/g, "\n")
-                .replace(/\0/g, "\n");
+            .replace(/\r\n/g, "\n")
+            .replace(/\0/g, "\n");
     }, [log])
 
     return (
@@ -20,7 +20,7 @@ export function CardLog(log: Log) {
             </CardHeader>
             <CardContent className="px-2">
                 <span className="text-[11px] font-monospace leading-snug whitespace-pre-wrap break-words">
-                {normalizedMessage}
+                    {normalizedMessage}
                 </span>
             </CardContent>
         </Card>

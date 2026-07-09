@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader } from "../ui/card";
-import { Chart } from "./Chart";
-import { Button } from "../ui/button";
+import { Chart } from '@/components/business/Chart';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { IconEye } from '@tabler/icons-react';
 import { IconEyeOff } from '@tabler/icons-react';
 import { useState } from "react";

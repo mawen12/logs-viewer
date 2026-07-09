@@ -1,26 +1,27 @@
-import './App.css'
-import { Header } from './components/layout/Header'
-import { Main } from './components/layout/Main'
-import { TooltipProvider } from './components/ui/tooltip'
-import { SnackbarProvider } from './contexts/SnackbarProvider'
-import { ThemeProvider } from './contexts/ThemeProvider'
-import { WebsocketProvider } from './contexts/WebsocketProvider'
+import { Toaster } from 'sonner';
+import { NavigationProgress } from './components/navigation-progress';
+import { TooltipProvider } from './components/ui/tooltip';
+import { SnackbarProvider } from './contexts/snackbar-provider';
+import { ThemeProvider } from './contexts/theme-provider';
+import { Home } from './features/home';
+import { Layout } from './components/layout/layout';
 
 function App() {
 
   return (
-    <WebsocketProvider>
+    // <WebsocketProvider>
       <ThemeProvider>
         <TooltipProvider>
           <SnackbarProvider>
-            <div className="h-screen overflow-auto flex flex-col">
-              <Header />
-              <Main />
-            </div>
+            <NavigationProgress />
+            <Toaster richColors duration={2500} position="top-right" />
+            <Layout>
+              <Home/>
+            </Layout>
           </SnackbarProvider>
         </TooltipProvider>
       </ThemeProvider>
-    </WebsocketProvider>
+    // </WebsocketProvider>
   )
 }
 

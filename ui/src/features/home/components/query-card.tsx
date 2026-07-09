@@ -1,20 +1,20 @@
 import type { FetchLogsParams } from "@/api/type";
-import type { WebsocketEvent } from "@/contexts/WebsocketProvider";
+import type { WebsocketEvent } from "@/contexts/websocket-provider";
 import { useWebsocketStore, type WebsocketQueryEvent } from "@/hooks/useWebsocketStore";
 import { useAppStore } from "@/store/useAppStore";
 import { useDebugStore } from "@/store/useDebugStore";
 import { useLogStore } from "@/store/useLogStore";
 import { useQueryStore } from "@/store/useQueryStore";
 import { useTimeStore } from "@/store/useTimeStore";
-import { strToDateTimeMinuteDash } from "@/utils/TimeUtils";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Badge } from "../ui/badge";
-import { Card, CardContent } from "../ui/card";
-import { Checkbox } from "../ui/checkbox";
-import { Field } from "../ui/field";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { ExecuteButton } from "./ExecuteButton";
+import { strToDateTimeMinuteDash } from "@/lib/time";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Field } from "@/components/ui/field";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ExecuteButton } from "@/components/business/ExecuteButton";
 
 export function QueryCard() {
     const { type, range, timeParams } = useTimeStore();
@@ -95,14 +95,14 @@ export function QueryCard() {
                 <div className="flex flex-col gap-2">
                     <div className="flex flex-row gap-2">
                         <div className="flex-1 flex gap-2">
-                            <Label htmlFor="query">
+                            <Label htmlFor="query" className="text-xl">
                                 Query:
                             </Label>
                             <Input id="query" value={query} onChange={(e) => setQuery(e.target.value)} onKeyDown={handleKeyDown} />
                         </div>
 
                         <div className="flex gap-2">
-                            <Label htmlFor="limit">
+                            <Label htmlFor="limit" className="text-xl">
                                 Limit:
                             </Label>
                             <Input id="limit" type="number" value={limit} onChange={(e) => setLimit(Number(e.target.value))} onKeyDown={handleKeyDown} />

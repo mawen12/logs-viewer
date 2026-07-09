@@ -7,7 +7,7 @@ import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { strToDateTimeMinute } from "@/utils/TimeUtils";
+import { strToDateTimeMinute } from "@/lib/time";
 
 const PRESETS = [
     "5m",
@@ -84,7 +84,7 @@ export function TimeFilter() {
                         </div>
                         <div className="space-y-2">
                             <div className="text-xs text-muted-foreground">To</div>
-                            <Input type="datetime-local" value={to} onChange={(e) => setTo(e.target.value)} />
+                            <Input type={'datetime-local'} value={to} onChange={(e) => setTo(e.target.value)} />
                         </div>
                         <Separator />
                         <Button className="w-full" onClick={() => {

@@ -1,4 +1,4 @@
-import { useWebsocket } from "@/contexts/WebsocketProvider";
+import { useWebsocket } from "@/contexts/websocket-provider";
 import { useWebsocketStore } from "@/hooks/useWebsocketStore";
 import { IconPlug, IconPlugX } from '@tabler/icons-react';
 import { useMemo } from "react";

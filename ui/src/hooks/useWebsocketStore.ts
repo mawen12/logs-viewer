@@ -1,4 +1,4 @@
-import type { WebsocketEvent } from "@/contexts/WebsocketProvider";
+import type { WebsocketEvent } from "@/contexts/websocket-provider";
 import { create } from "zustand";
 
 export interface WebsocketInitEvent extends WebsocketEvent {

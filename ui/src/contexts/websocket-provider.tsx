@@ -15,7 +15,7 @@ export interface WebsocketContextProps {
     err: Event | null
 }
 
-const WebsocketContext = createContext<WebsocketContextProps>({ws: undefined, status: "closed", err: null});
+const WebsocketContext = createContext<WebsocketContextProps>({ ws: undefined, status: "closed", err: null });
 
 type WsStatus = "connecting" | "open" | "closing" | "closed";
 
@@ -57,13 +57,13 @@ export function WebsocketProvider({ children }: WebsocketProviderProps) {
     //     ws.close(1000, "manual close");
     // }, [ws])
 
-    useEffect(() => {
-        connect();
+    // useEffect(() => {
+    //     connect();
 
-        return () => {
-            ws?.close(1000, "unmount")
-        }
-    }, [connect, ws]);
+    //     return () => {
+    //         ws?.close(1000, "unmount")
+    //     }
+    // }, [connect, ws]);
 
     const value = {
         ws,
@@ -71,9 +71,11 @@ export function WebsocketProvider({ children }: WebsocketProviderProps) {
         err
     }
 
-    return <WebsocketContext.Provider value={value}>
-        {children}
-    </WebsocketContext.Provider>
+    return (
+        <WebsocketContext.Provider value={value}>
+            {children}
+        </WebsocketContext.Provider>
+    )
 }
 
 export function useWebsocket() {
