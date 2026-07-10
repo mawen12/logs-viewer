@@ -1,14 +1,13 @@
 
 import { Activity } from "lucide-react";
 import type { ReactNode } from "react";
-import { TimeFilter } from "../business/TimeFilter";
 import { DebugToggle } from "../debug-toggle";
 import { ThemeSwitch } from "../theme-switch";
-import { TimeRangePicker } from "../time-range-picker";
 import { Separator } from "../ui/separator";
 import { Container } from "./container";
 import { Header } from "./header";
 import { Main } from "./main";
+import { TimeRangePicker } from "../time-range/time-range-picker";
 
 export type LayoutProps = {
     children: ReactNode
@@ -28,7 +27,6 @@ export function Layout({ children }: LayoutProps) {
 
                 <DebugToggle/>
                 <TimeRangePicker/>
-                <TimeFilter/>
                 <ThemeSwitch />
             </Header>
 
