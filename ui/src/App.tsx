@@ -6,6 +6,7 @@ import { ThemeProvider } from './contexts/theme-provider';
 import { Home } from './features/home';
 import { Layout } from './components/layout/layout';
 import { LogsProvider } from './features/home/components/logs-provider';
+import { AppSidebar } from './components/layout/app-sidebar';
 
 function App() {
 
@@ -18,7 +19,11 @@ function App() {
           <Toaster richColors duration={2500} position="top-right" />
           <LogsProvider>
             <Layout>
-              <Home />
+              <AppSidebar />
+              {/* <Home className='w-full'/> */}
+              {/* <Home className='max-w-7xl'/> */}
+              
+              {/* <Home/> */}
             </Layout>
           </LogsProvider>
         </SnackbarProvider>

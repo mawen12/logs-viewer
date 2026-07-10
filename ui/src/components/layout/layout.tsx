@@ -33,7 +33,7 @@ export function Layout({ children }: LayoutProps) {
             <Separator className='shadow-sm' />
 
             {/* ===== Main ===== */}
-            <Main compact className='p-2 space-y-4'>
+            <Main className='p-2 space-y-4 flex flex-row items-center justify-between'>
                 {children}
             </Main>
         </Container>

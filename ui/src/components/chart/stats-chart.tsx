@@ -37,32 +37,8 @@ export function StatsChart({
     const [left, setLeft] = useState<number>()
     const [right, setRight] = useState<number>()
     const [isSelecting, setIsSelecting] = useState(false)
-    // const [shiftPressed, setShiftPressed] = useState(false)
-
-    // useEffect(() => {
-    //     const handleKeyDown = (e: KeyboardEvent) => {
-    //         if (e.key === "Shift") {
-    //             setShiftPressed(true)
-    //         }
-    //     }
-
-    //     const handleKeyUp = (e: KeyboardEvent) => {
-    //         if (e.key === "Shift") {
-    //             setShiftPressed(false)
-    //         }
-    //     }
-
-    //     window.addEventListener('keydown', handleKeyDown)
-    //     window.addEventListener('keyup', handleKeyUp)
-
-    //     return () => {
-    //         window.removeEventListener('keydown', handleKeyDown)
-    //         window.removeEventListener('keyup', handleKeyUp)
-    //     }
-    // }, [])
 
     return (
-
         <ChartContainer config={chartConfig} className={cn("aspect-auto h-62.5 w-full", className)}>
             <BarChart
                 accessibilityLayer
