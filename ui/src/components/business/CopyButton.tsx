@@ -1,4 +1,4 @@
-import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { useLogStore } from "@/store/useLogStore";
 import { IconClipboardCheck, IconCopy } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";

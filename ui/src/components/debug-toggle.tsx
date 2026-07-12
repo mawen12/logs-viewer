@@ -16,7 +16,7 @@ export function DebugToggle() {
 
     return (
         <Toggle
-            variant={'outline'}
+            variant={'default'}
             value={value}
             onPressedChange={(pressed) => setValue(pressed ? 1 : 0)}
             className="">

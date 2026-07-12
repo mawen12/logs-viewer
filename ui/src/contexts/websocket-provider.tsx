@@ -1,5 +1,5 @@
-import { useWebsocketStore } from "@/hooks/useWebsocketStore";
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useWebsocketStore } from "@/hooks/use-websocket-store";
+import { createContext, useCallback, useContext, useState } from "react";
 
 type WebsocketProviderProps = {
     children: React.ReactNode

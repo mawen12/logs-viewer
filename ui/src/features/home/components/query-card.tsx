@@ -1,6 +1,6 @@
 import type { FetchLogsParams } from "@/api/type";
 import type { WebsocketEvent } from "@/contexts/websocket-provider";
-import { useWebsocketStore, type WebsocketQueryEvent } from "@/hooks/useWebsocketStore";
+import { useWebsocketStore, type WebsocketQueryEvent } from "@/hooks/use-websocket-store";
 import { useAppStore } from "@/store/useAppStore";
 import { useDebugStore } from "@/store/useDebugStore";
 import { useLogStore } from "@/store/useLogStore";

@@ -1,60 +1,300 @@
-import { Home } from "@/features/home";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem, SidebarProvider } from "../ui/sidebar";
+import { useMemo, useState, type ReactNode } from "react";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "../ui/sidebar";
 import { Checkbox } from "../ui/checkbox";
 import { Field } from "../ui/field";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
-import { ChevronRight } from "lucide-react";
+import { Activity, ChevronRight, LayoutDashboard, ListTodo, Server } from "lucide-react";
 import { Label } from "../ui/label";
+import { Link, useLocation } from "@tanstack/react-router";
+import {
+  type NavCollapsible,
+  type NavItem,
+  type NavLink,
+  type NavGroup as NavGroupProps,
+} from './types'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Badge } from "../ui/badge";
+
+const navGroups = [
+    {
+      title: 'General',
+      items: [
+        {
+          title: 'Home',
+          url: '/',
+          icon: LayoutDashboard,
+        },
+        {
+          title: 'Sources',
+          url: '/sources',
+          icon: Server,
+        },
+      ],
+    },
+]
 
 export function AppSidebar() {
-    
   return (
-    <SidebarProvider>
-        <Sidebar collapsible={'none'} variant={'floating'}>
-            <SidebarContent>
-                <SidebarGroup>
-                    <SidebarGroupLabel>Sections</SidebarGroupLabel>
-                    <SidebarMenu>
-                        {/* group */}
-                        <Collapsible asChild className='group/collapsible'>
-                            <SidebarMenuItem>
-                                <Field orientation={'horizontal'}>
-                                    <Checkbox id="default-group" name="Default Group" />
-                                    <CollapsibleTrigger asChild> 
-                                            <SidebarMenuButton className="p-0" tooltip={"Default group"}>
-                                                Default Group
-                                                <ChevronRight className='ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180' />
-                                            </SidebarMenuButton>
-                                    </CollapsibleTrigger>
-                                </Field>
-                                <CollapsibleContent>
-                                    <SidebarMenuSub>
-                                        <SidebarMenuSubItem>
-                                            <Field orientation={'horizontal'}>
-                                                <Checkbox id="default-source" name="Default Source" />
-                                                <Label htmlFor="default-source">Default Source</Label>
-                                            </Field>
-                                        </SidebarMenuSubItem>
+    <Sidebar collapsible={'icon'} variant={'inset'}>
+        <SidebarHeader>
+            <Logo />
+            {/* <div className='flex flex-row items-center justify-between gap-2 me-auto'>
+                
+            </div> */}
+        </SidebarHeader>
+        <SidebarContent>
+            {/* <SidebarMenu> */}
+                {/* group */}
+                {/* <AppSidebarGroup/> */}
+            {/* </SidebarMenu> */}
+            {navGroups.map((props) => (
+                <NavGroup key={props.title} {...props} />
+            ))}
+        </SidebarContent>
+    </Sidebar>
+  )
+}
 
-                                        <SidebarMenuSubItem>
-                                            <Field orientation={'horizontal'}>
-                                                <Checkbox id="default-source1" name="Default Source1" />
-                                                <Label htmlFor="default-source1">Default Source1</Label>
-                                            </Field>
-                                        </SidebarMenuSubItem>
-                                    </SidebarMenuSub>
-                                </CollapsibleContent>
-                               
-                            </SidebarMenuItem>
-                        </Collapsible>
+function Logo() {
+    return (
+        <SidebarMenu>
+            <SidebarMenuItem>
+                <SidebarMenuButton size={'lg'}>
+                    <div className='flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground'>
+                        <Activity size={18} className={'text-blue-400'} />
+                    </div>
+                    <div className='grid flex-1 text-start text-sm leading-tight'>
+                        <span className='truncate font-semibold'>
+                            Log Viewer
+                        </span>
+                    </div>
+                </SidebarMenuButton>   
+            </SidebarMenuItem>
+        </SidebarMenu>
+    )
+}
 
-                    </SidebarMenu>
-                </SidebarGroup>
-            </SidebarContent>
-        </Sidebar>
-        <div className="w-full">
-            <Home />
-        </div>
-    </SidebarProvider>
+function NavGroup({title, items}: NavGroupProps) {
+    const { state, isMobile } = useSidebar()
+    const href = useLocation({ select: (location) => location.href })
+
+    return (
+        <SidebarGroup>
+        <SidebarGroupLabel>{title}</SidebarGroupLabel>
+        <SidebarMenu>
+            {items.map((item) => {
+            const key = `${item.title}-${item.url}`
+
+            if (!item.items)
+                return <SidebarMenuLink key={key} item={item} href={href} />
+
+            if (state === 'collapsed' && !isMobile)
+                return (
+                <SidebarMenuCollapsedDropdown key={key} item={item} href={href} />
+                )
+
+            return <SidebarMenuCollapsible key={key} item={item} href={href} />
+            })}
+        </SidebarMenu>
+        </SidebarGroup>
+    )
+}
+
+function AppSidebarGroup() {
+    const [defaultSourceChecked, setDefaultSourceChecked] = useState(false);
+    const [defaultSource1Checked, setDefaultSource1Checked] = useState(false);
+
+    const defaultGroupChecked = useMemo(() => {
+        const selectedCount = Number(defaultSourceChecked) + Number(defaultSource1Checked);
+        if (selectedCount === 0) {
+            return false;
+        }
+        if (selectedCount === 2) {
+            return true;
+        }
+        return "indeterminate" as const;
+    }, [defaultSourceChecked, defaultSource1Checked]);
+
+    const handleDefaultGroupChange = (checked: boolean | "indeterminate") => {
+        const nextChecked = checked === true;
+        setDefaultSourceChecked(nextChecked);
+        setDefaultSource1Checked(nextChecked);
+    };
+
+    const handleDefaultSourceChange = (checked: boolean | "indeterminate") => {
+        setDefaultSourceChecked(checked === true);
+    };
+
+    const handleDefaultSource1Change = (checked: boolean | "indeterminate") => {
+        setDefaultSource1Checked(checked === true);
+    };
+
+    return (
+        <Collapsible asChild className='group/collapsible'>
+            <SidebarMenuItem>
+                <Field orientation={'horizontal'}>
+                    <Checkbox
+                        id="default-group"
+                        name="Default Group"
+                        checked={defaultGroupChecked}
+                        onCheckedChange={handleDefaultGroupChange}
+                    />
+                    <CollapsibleTrigger asChild> 
+                            <SidebarMenuButton className="p-0" tooltip={"Default group"}>
+                                Default Group
+                                <ChevronRight className='ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180' />
+                            </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                </Field>
+                <CollapsibleContent>
+                    <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                            <Field orientation={'horizontal'}>
+                                <Checkbox
+                                    id="default-source"
+                                    name="Default Source"
+                                    checked={defaultSourceChecked}
+                                    onCheckedChange={handleDefaultSourceChange}
+                                />
+                                <Label className="cursor-pointer" htmlFor="default-source">Default Source</Label>
+                            </Field>
+                        </SidebarMenuSubItem>
+
+                        <SidebarMenuSubItem>
+                            <Field orientation={'horizontal'}>
+                                <Checkbox
+                                    id="default-source1"
+                                    name="Default Source1"
+                                    checked={defaultSource1Checked}
+                                    onCheckedChange={handleDefaultSource1Change}
+                                />
+                                <Label className="cursor-pointer" htmlFor="default-source1">Default Source1</Label>
+                            </Field>
+                        </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                </CollapsibleContent>
+            </SidebarMenuItem>
+        </Collapsible>
+    )
+}
+
+
+function NavBadge({ children }: { children: ReactNode }) {
+  return <Badge className='rounded-full px-1 py-0 text-xs'>{children}</Badge>
+}
+
+function SidebarMenuLink({ item, href }: { item: NavLink; href: string }) {
+    const { setOpenMobile } = useSidebar()
+    return (
+        <SidebarMenuItem>
+        <SidebarMenuButton
+            asChild
+            isActive={checkIsActive(href, item)}
+            tooltip={item.title}
+        >
+            <Link to={item.url} onClick={() => setOpenMobile(false)}>
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
+            {item.badge && <NavBadge>{item.badge}</NavBadge>}
+            </Link>
+        </SidebarMenuButton>
+        </SidebarMenuItem>
+    )
+}
+
+function SidebarMenuCollapsible({item, href }: { item: NavCollapsible, href: string}) {
+    const { setOpenMobile } = useSidebar()
+    return (
+        <Collapsible
+        asChild
+        defaultOpen={checkIsActive(href, item, true)}
+        className='group/collapsible'
+        >
+        <SidebarMenuItem>
+            <CollapsibleTrigger asChild>
+            <SidebarMenuButton tooltip={item.title}>
+                {item.icon && <item.icon />}
+                <span>{item.title}</span>
+                {item.badge && <NavBadge>{item.badge}</NavBadge>}
+                <ChevronRight className='ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180' />
+            </SidebarMenuButton>
+            </CollapsibleTrigger>
+            <CollapsibleContent className='CollapsibleContent'>
+            <SidebarMenuSub>
+                {item.items.map((subItem) => (
+                <SidebarMenuSubItem key={subItem.title}>
+                    <SidebarMenuSubButton
+                    asChild
+                    isActive={checkIsActive(href, subItem)}
+                    >
+                    <Link to={subItem.url} onClick={() => setOpenMobile(false)}>
+                        {subItem.icon && <subItem.icon />}
+                        <span>{subItem.title}</span>
+                        {subItem.badge && <NavBadge>{subItem.badge}</NavBadge>}
+                    </Link>
+                    </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+                ))}
+            </SidebarMenuSub>
+            </CollapsibleContent>
+        </SidebarMenuItem>
+        </Collapsible>
+    )
+}
+
+function SidebarMenuCollapsedDropdown({
+  item,
+  href,
+}: {
+  item: NavCollapsible
+  href: string
+}) {
+  return (
+    <SidebarMenuItem>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <SidebarMenuButton
+            tooltip={item.title}
+            isActive={checkIsActive(href, item)}
+          >
+            {item.icon && <item.icon />}
+            <span>{item.title}</span>
+            {item.badge && <NavBadge>{item.badge}</NavBadge>}
+            <ChevronRight className='ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
+          </SidebarMenuButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent side='right' align='start' sideOffset={4}>
+          <DropdownMenuLabel>
+            {item.title} {item.badge ? `(${item.badge})` : ''}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {item.items.map((sub) => (
+            <DropdownMenuItem key={`${sub.title}-${sub.url}`} asChild>
+              <Link
+                to={sub.url}
+                className={`${checkIsActive(href, sub) ? 'bg-secondary' : ''}`}
+              >
+                {sub.icon && <sub.icon />}
+                <span className='max-w-52 text-wrap'>{sub.title}</span>
+                {sub.badge && (
+                  <span className='ms-auto text-xs'>{sub.badge}</span>
+                )}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </SidebarMenuItem>
+  )
+}
+
+function checkIsActive(href: string, item: NavItem, mainNav = false) {
+  return (
+    href === item.url || // /endpint?search=param
+    href.split('?')[0] === item.url || // endpoint
+    !!item?.items?.filter((i) => i.url === href).length || // if child nav is active
+    (mainNav &&
+      href.split('/')[1] !== '' &&
+      href.split('/')[1] === item?.url?.split('/')[1])
   )
 }
