@@ -22,16 +22,19 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { type Source } from '../data/schema';
 import { DataTableBulkActions } from './data-table-bulk-actions';
-import { sourcesColumns as columns } from './sources-columns';
+import { useSources } from './sources-provider';
+import { columns } from './sources-columns';
 
 type DataTableProps = {
   data?: Source[]
 }
 
 export function SourcesTable({ data }: DataTableProps) {  
+  const { setOpen, setCurrentRow } = useSources()
+  const tableColumns = useMemo(() => columns(setOpen, setCurrentRow), [setOpen, setCurrentRow])
 
   // Local UI-only states
   const [rowSelection, setRowSelection] = useState({})
@@ -41,12 +44,12 @@ export function SourcesTable({ data }: DataTableProps) {
   // Local state management for table (uncomment to use local-only state, not synced with URL)
   const [globalFilter, onGlobalFilterChange] = useState('')
   const [columnFilters, onColumnFiltersChange] = useState<ColumnFiltersState>([])
-  const [pagination, onPaginationChange] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
+  const [pagination, onPaginationChange] = useState<PaginationState>({ pageIndex: 0, pageSize: 50 })
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
-    data,
-    columns,
+    data: data ?? [],
+    columns: tableColumns,
     state: {
       sorting,
       columnVisibility,
@@ -93,71 +96,71 @@ export function SourcesTable({ data }: DataTableProps) {
         table={table}
         searchPlaceholder='Filter by name or gruop...'
       />
-      <div className='min-h-0 flex-1 overflow-y-auto rounded-md border'>
-        <Table className='min-w-xl'>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      className={cn(
-                        header.column.columnDef.meta?.className,
-                        header.column.columnDef.meta?.thClassName
-                      )}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
+      <div className='flex h-full min-h-0 flex-1 overflow-hidden rounded-md border'>
+          <Table className='min-h-0 flex-1 '>
+            <TableHeader className='top-0 sticky bg-white dark:bg-black z-10'>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        className={cn(
+                          header.column.columnDef.meta?.className,
+                          header.column.columnDef.meta?.thClassName,
                         )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn(
-                        cell.column.columnDef.meta?.className,
-                        cell.column.columnDef.meta?.tdClassName
-                      )}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                      </TableHead>
+                    )
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className='h-24 text-center'
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className={cn(
+                          cell.column.columnDef.meta?.className,
+                          cell.column.columnDef.meta?.tdClassName
+                        )}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={tableColumns.length}
+                    className='h-24 text-center'
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
       </div>
-      <DataTablePagination table={table} className='mb-4'/>
-      <DataTableBulkActions table={table} />
+      <DataTablePagination table={table} className='mb-4' />
+      <DataTableBulkActions table={table} title='Delete selected tasks'/>
     </div>
   )
 }

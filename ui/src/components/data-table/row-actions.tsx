@@ -9,19 +9,23 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { type Row } from '@tanstack/react-table';
 import { Ellipsis, Trash2 } from 'lucide-react';
-import { sourceSchema } from '../data/schema';
-import { useSources } from './sources-provider';
+
+export type DialogType = 'create' | 'update' | 'delete'
 
 type DataTableRowActionsProps<TData> = {
   row: Row<TData>
+  setOpen: (str: DialogType | null) => void
+  setCurrentRow: (row: TData) => void
+  getCurrentRow?: (row: Row<TData>) => TData
 }
 
 export function DataTableRowActions<TData>({
   row,
+  setOpen,
+  setCurrentRow,
+  getCurrentRow = (tableRow) => tableRow.original
 }: DataTableRowActionsProps<TData>) {
-  const source = sourceSchema.parse(row.original)
-
-  const { setOpen, setCurrentRow } = useSources()
+  const currentRow = getCurrentRow(row)
 
   return (
     <DropdownMenu modal={false}>
@@ -37,7 +41,7 @@ export function DataTableRowActions<TData>({
       <DropdownMenuContent align='end' className='w-40'>
         <DropdownMenuItem
           onClick={() => {
-            setCurrentRow(source)
+            setCurrentRow(currentRow)
             setOpen('update')
           }}
           className='cursor-pointer'
@@ -49,7 +53,7 @@ export function DataTableRowActions<TData>({
         <DropdownMenuItem
           variant='destructive'
           onClick={() => {
-            setCurrentRow(source)
+            setCurrentRow(currentRow)
             setOpen('delete')
           }}
           className='cursor-pointer'

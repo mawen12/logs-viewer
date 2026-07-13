@@ -1,10 +1,19 @@
 import { type ColumnDef } from '@tanstack/react-table'
+import { type Dispatch, type SetStateAction } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
-import { type Source } from '../data/schema'
-import { DataTableRowActions } from './data-table-row-actions'
+import { sourceSchema, type Source } from '../data/schema'
+import { DataTableRowActions, type DialogType } from '../../../components/data-table/row-actions'
 
-export const sourcesColumns: ColumnDef<Source>[] = [
+type SetOpen = (value: DialogType | null) => void
+type SetCurrentRow = Dispatch<SetStateAction<Source | null>>
+
+export const columns = (
+  setOpen: SetOpen,
+  setCurrentRow: SetCurrentRow
+): ColumnDef<Source>[] => {
+
+  return [
   {
     id: 'select',
     header: ({ table }) => (
@@ -91,6 +100,14 @@ export const sourcesColumns: ColumnDef<Source>[] = [
   },
   {
     id: 'actions',
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    cell: ({ row }) => (
+      <DataTableRowActions
+        row={row}
+        setOpen={setOpen}
+        setCurrentRow={setCurrentRow}
+        getCurrentRow={(tableRow) => sourceSchema.parse(tableRow.original)}
+      />
+    ),
   },
 ]
+}

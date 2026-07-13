@@ -12,7 +12,7 @@ export function Main({ className, compact, fixed, ...props }: MainProps) {
       className={cn(
         'w-full',
         compact && 'max-w-7xl mx-auto',
-        fixed && 'h-svh overflow-hidden! p-4',
+        fixed && 'h-svh p-4',
         className
       )}
       {...props}

@@ -45,7 +45,6 @@ export function DataTableViewOptions<TData>({
           )
           .map((column) => {
             return (
-              // 
               <DropdownMenuCheckboxItem
                 key={column.id}
                 className='capitalize'

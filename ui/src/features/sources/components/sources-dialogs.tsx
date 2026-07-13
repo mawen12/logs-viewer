@@ -2,6 +2,7 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useState } from "react";
 import { SourcesMutateDialog } from "./sources-mutate-dialog";
 import { useSources } from "./sources-provider";
+import { toast } from "sonner";
 
 export function SourcesDialogs() {
   const { open, setOpen, currentRow, setCurrentRow, deleteById } = useSources()
@@ -43,7 +44,14 @@ export function SourcesDialogs() {
         }}
         handleConfirm={async () => {
           setIsLoading(true)
-          await deleteById(currentRow.id)
+          try {
+            await deleteById(currentRow.id)
+            toast.success('delete success')
+          } catch (err) {
+            toast.error(err?.response?.data)
+          } finally {
+            setIsLoading(false)
+          }
         }}
         className='max-w-md'
         title={`Delete this source: ${currentRow.id} ?`}

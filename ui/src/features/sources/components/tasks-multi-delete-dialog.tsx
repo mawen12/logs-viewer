@@ -33,17 +33,6 @@ export function SourcesMultiDeleteDialog<TData>({
     }
 
     onOpenChange(false)
-
-    // toast.promise(sleep(2000), {
-    //   loading: 'Deleting tasks...',
-    //   success: () => {
-    //     setValue('')
-    //     table.resetRowSelection()
-    //     return `Deleted ${selectedRows.length} ${selectedRows.length > 1 ? 'sources' : 'source'
-    //       }`
-    //   },
-    //   error: 'Error',
-    // })
   }
 
   return (

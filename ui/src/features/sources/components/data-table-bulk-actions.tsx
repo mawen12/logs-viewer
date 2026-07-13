@@ -12,10 +12,12 @@ import { SourcesMultiDeleteDialog } from './tasks-multi-delete-dialog';
 
 type DataTableBulkActionsProps<TData> = {
   table: Table<TData>
+  title: string
 }
 
 export function DataTableBulkActions<TData>({
   table,
+  title,
 }: DataTableBulkActionsProps<TData>) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const selectedRows = table.getFilteredSelectedRowModel().rows
@@ -30,15 +32,15 @@ export function DataTableBulkActions<TData>({
               size='icon'
               onClick={() => setShowDeleteConfirm(true)}
               className='size-8'
-              aria-label='Delete selected tasks'
-              title='Delete selected tasks'
+              aria-label={title}
+              title={title}
             >
               <Trash2 />
-              <span className='sr-only'>Delete selected tasks</span>
+              <span className='sr-only'>{title}</span>
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Delete selected tasks</p>
+            <p>{title}</p>
           </TooltipContent>
         </Tooltip>
       </BulkActionsToolbar>
