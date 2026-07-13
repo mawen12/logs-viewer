@@ -89,6 +89,12 @@ func routes(config serverConfig) http.Handler {
 	mux.HandleFunc("GET /static/*path", http.StripPrefix("static", ui.GetHandler()).ServeHTTP)
 	mux.HandleFunc("GET /favicon.svg", ui.GetHandler().ServeHTTP)
 	mux.HandleFunc("GET /query", query)
+
+	// sources
+	{
+		
+	}
+
 	mux.HandleFunc("/ws", serveWs)
 	if *debug {
 		expvar.Publish("goroutines", expvar.Func(func() any {

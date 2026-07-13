@@ -55,8 +55,10 @@ interface TimeRangeFormProps extends Omit<HTMLAttributes<HTMLFormElement>, 'onSu
     onCancel: () => void
 }
 
+type Form = z.infer<typeof formSchema>
+
 export function TimeRangeForm({ className, initStartTime, initEndTime, onSubmit, onCancel, ...props }: TimeRangeFormProps) {
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<Form>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             startTime: initStartTime ?? '',
@@ -64,7 +66,7 @@ export function TimeRangeForm({ className, initStartTime, initEndTime, onSubmit,
         }
     })
 
-    function submitHandler(data: z.infer<typeof formSchema>) {
+    function submitHandler(data: Form) {
         onSubmit(data.startTime, data.endTime)
     }
 

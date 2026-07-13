@@ -1,14 +1,18 @@
-import { Plus } from 'lucide-react'
+import { Plus, RefreshCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useSources } from './sources-provider';
+import { cn } from '@/lib/utils';
 
 export function SourcesPrimaryButtons() {
-  const { setOpen } = useSources()
+  const { setOpen, refetch, isFetching } = useSources()
   return (
     <div className='flex gap-2'>
-      <Button className='space-x-1' onClick={() => setOpen('create')}>
-        <span>Create</span> <Plus size={18} />
+      <Button variant={'outline'} size={'icon-lg'} className='space-x-1' title="Create" onClick={() => setOpen('create')}>
+        <Plus size={18} />
       </Button>
+      <Button variant={'outline'} size={'icon-lg'} title='Refresh' disabled={isFetching} onClick={() => refetch()}>
+            <RefreshCcw className={cn(isFetching && 'animate-spin')} />
+          </Button>
     </div>
   )
 }

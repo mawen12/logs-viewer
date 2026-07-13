@@ -1,25 +1,25 @@
-import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 import { Outlet } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
-import { cn } from "@/lib/utils";
 
 export type AuthenticatedLayoutProps = {
     children?: ReactNode
-} 
+}
 
-export function AuthenticatedLayout({children}: AuthenticatedLayoutProps) {
+export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
     return (
         <SidebarProvider>
             <AppSidebar />
-            <SidebarInset 
-                    className={cn(
-                        '@container/content',
-                        'has-data-[layout=fixed]:h-svh',
-                        'peer-data-[variant=inset]:has-data-[layout=fixed]:h-[calc(100svh-(var(--spacing)*4))]'
-                    )}
-                >
-                {children ?? <Outlet/>}
+            <SidebarInset
+                className={cn(
+                    '@container/content',
+                    'has-data-[layout=fixed]:h-svh',
+                    'peer-data-[variant=inset]:has-data-[layout=fixed]:h-[calc(100svh-(var(--spacing)*4))]'
+                )}
+            >
+                {children ?? <Outlet />}
             </SidebarInset>
             {/* <Container>
             
@@ -43,6 +43,7 @@ export function AuthenticatedLayout({children}: AuthenticatedLayoutProps) {
                     {children ?? <Outlet/> }
                 </Main>
             </Container> */}
+
         </SidebarProvider>
     )
 }

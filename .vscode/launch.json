@@ -22,7 +22,6 @@
                 "config-alpine.properties"
             ]
         },
-
         {
             "name": "local",
             "type": "go",
@@ -32,6 +31,17 @@
             "args": [
                 "--config",
                 "config-local.properties"
+            ]
+        },
+        {
+            "name": "new",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/logsviewer",
+            "args": [
+                "--config",
+                "${workspaceFolder}/config.yaml"
             ]
         }
     ]

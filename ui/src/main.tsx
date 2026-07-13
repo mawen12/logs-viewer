@@ -1,14 +1,13 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import { routeTree } from './routeTree.gen'
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
-import { toast } from 'sonner';
-import { handleServerError } from './lib/handle-server-error.ts';
-import { ThemeProvider } from './contexts/theme-provider.tsx';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
+import { AxiosError } from 'axios';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { toast } from 'sonner';
 import { TooltipProvider } from './components/ui/tooltip.tsx';
+import { ThemeProvider } from './contexts/theme-provider.tsx';
+import './index.css';
+import { routeTree } from './routeTree.gen';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,7 +29,7 @@ const queryClient = new QueryClient({
     },
     mutations: {
       onError: (error) => {
-        handleServerError(error)
+        // handleServerError(error)
 
         if (error instanceof AxiosError) {
           if (error.response?.status === 304) {
@@ -47,7 +46,7 @@ const queryClient = new QueryClient({
           toast.error('Session expired!')
         }
         if (error.response?.status === 500) {
-          toast.error('Internal Server Error!')
+          // toast.error('Internal Server Error!')
         }
         if (error.response?.status === 403) {
           // router.navigate("/forbidden", { replace: true });

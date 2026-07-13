@@ -7,7 +7,7 @@ export const sourceSchema = z.object({
   name: z.string(),
   group: z.string(),
   source: z.string(),
-  isConfiged: z.boolean(),
+  isConfiged: z.boolean().optional(),
 })
 
 export type Source = z.infer<typeof sourceSchema>
