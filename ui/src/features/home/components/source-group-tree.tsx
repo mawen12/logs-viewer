@@ -6,30 +6,30 @@ import { Label } from "@/components/ui/label";
 import { ChevronRight } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
-interface NodeBase {
+export interface NodeBase {
     id: string
     label: string
 }
 
-interface GroupNode extends NodeBase {
+export interface GroupNode extends NodeBase {
     type: 'group'
     children: TreeNode[]
 }
 
-interface SourceNode extends NodeBase {
+export interface SourceNode extends NodeBase {
     type: 'source'
     parentId: string
 }
 
-type TreeNode = GroupNode | SourceNode
+export type TreeNode = GroupNode | SourceNode
 
 function isChildrenNode(node: TreeNode) {
     return node.type === 'source'
 }
 
-export function SourceGroupTree({ nodes }: { nodes: GroupNode[] }) {
-    const parentMap = useMemo((): Map<string, GroupNode> => {
-        const parentMap = new Map<string, GroupNode>()
+export function SourceGroupTree({ nodes }: { nodes: TreeNode[] }) {
+    const parentMap = useMemo((): Map<string, TreeNode> => {
+        const parentMap = new Map<string, TreeNode>()
         nodes.forEach((node) => {
             parentMap.set(node.id, node)
         })

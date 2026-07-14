@@ -18,6 +18,7 @@ func (app *Application) routes() http.Handler {
 	// sources
 	{
 		mux.HandleFunc("GET /api/sources", app.wrapper(app.listSource))
+		mux.HandleFunc("GET /api/sources/tree", app.wrapper(app.listSourceTree))
 		mux.HandleFunc("DELETE /api/sources/{id}", app.wrapper(app.deleteSource))
 		mux.HandleFunc("POST /api/sources", app.wrapper(app.addSource))
 		mux.HandleFunc("PUT /api/sources/{id}", app.wrapper(app.updateSource))

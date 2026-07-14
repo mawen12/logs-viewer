@@ -15,7 +15,7 @@ import { DataTableBulkActions } from './data-table-bulk-actions';
 import { useDataTable } from '@/contexts/data-table-provider';
 
 export function SourcesDataTable() {  
-  const {table } = useDataTable()
+  const {table } = useDataTable()  
 
   return (
     <div
@@ -80,7 +80,7 @@ export function SourcesDataTable() {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={table.getVisibleFlatColumns.length}
+                    colSpan={table.getAllColumns().length}
                     className='h-24 text-center'
                   >
                     No results.

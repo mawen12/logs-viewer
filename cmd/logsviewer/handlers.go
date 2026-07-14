@@ -155,5 +155,42 @@ func (app *Application) listSourceTree(w http.ResponseWriter, r *http.Request) (
 		return nil, err
 	}
 
-	
+	groupBySources := make(map[string][]model.Source, 0)
+	for _, source := range result {
+		arr, ok := groupBySources[source.Group]
+		if !ok {
+			arr = make([]model.Source, 0)
+		}
+		groupBySources[source.Group] = append(arr, source)
+	}
+
+	type treeSource struct {
+		Id       string       `json:"id"`
+		Label    string       `json:"label"`
+		Type     string       `json:"type"`
+		Children []treeSource `json:"children"`
+		ParentId string       `json:"parentId"`
+	}
+
+	treeSources := make([]treeSource, 0)
+	for group, sources := range groupBySources {
+		childTreeSources := make([]treeSource, 0)
+		for _, source := range sources {
+			childTreeSources = append(childTreeSources, treeSource{
+				Id:       source.ID,
+				Label:    source.Name,
+				Type:     "source",
+				ParentId: source.Group,
+			})
+		}
+
+		treeSources = append(treeSources, treeSource{
+			Id:       group,
+			Label:    group,
+			Type:     "group",
+			Children: childTreeSources,
+		})
+	}
+
+	return treeSources, nil
 }

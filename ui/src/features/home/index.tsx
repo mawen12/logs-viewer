@@ -10,8 +10,12 @@ import { TimeRangePicker } from "@/components/time-range/time-range-picker";
 import { DebugToggle } from "@/components/debug-toggle";
 import { SourceGroupTree } from "./components/source-group-tree";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { useGetTreeSourcesQuery } from "@/api/sources/getTreeSources";
 
 export function Home() {
+
+    const {data, refetch, isFetching} = useGetTreeSourcesQuery()
+
     return (
         <LogsProvider>
             <Header>
@@ -25,11 +29,7 @@ export function Home() {
                 <ResizablePanelGroup className="rounded-lg border">
                     <ResizablePanel defaultSize="15%" minSize="10%">
                         <div className="h-full overflow-auto p-2">
-                            <SourceGroupTree nodes={[{
-                                id: "1", label: 'Default Group', type: 'group', children: [
-                                    { id: '2', label: 'Default Souce1', parentId: "1", type: 'source' },
-                                    { id: '3', label: 'Default Souce2', parentId: "1", type: 'source' }]
-                            }]} />
+                            <SourceGroupTree nodes={data ?? []} />
                         </div>
                     </ResizablePanel>
                     <ResizableHandle withHandle />
