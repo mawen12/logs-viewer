@@ -28,7 +28,7 @@ const SourcesContext = React.createContext<SourcesContextType | null>(null)
 export function SourcesProvider({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useDialogState<SourcesDialogType>(null)
   const [currentRow, setCurrentRow] = useState<Source | null>(null)
-
+  
   const { data, isFetching, refetch } = useGetSourcesQuery({})
 
   const addState = useAddSource()

@@ -7,12 +7,12 @@ export function SourcesPrimaryButtons() {
   const { setOpen, refetch, isFetching } = useSources()
   return (
     <div className='flex gap-2'>
-      <Button variant={'outline'} size={'icon-lg'} className='space-x-1' title="Create" onClick={() => setOpen('create')}>
-        <Plus size={18} />
+      <Button variant={'outline'} size={'lg'} title="Create" onClick={() => setOpen('create')}>
+        <Plus size={18} /> Create
       </Button>
-      <Button variant={'outline'} size={'icon-lg'} title='Refresh' disabled={isFetching} onClick={() => refetch()}>
-            <RefreshCcw className={cn(isFetching && 'animate-spin')} />
-          </Button>
+      <Button variant={'outline'} size={'lg'} title='Refresh' disabled={isFetching} onClick={() => refetch()}>
+        <RefreshCcw className={cn(isFetching && 'animate-spin')} /> Refresh
+      </Button>
     </div>
   )
 }

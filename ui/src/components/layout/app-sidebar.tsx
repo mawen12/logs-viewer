@@ -1,19 +1,16 @@
-import { useMemo, useState, type ReactNode } from "react";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "../ui/sidebar";
-import { Checkbox } from "../ui/checkbox";
-import { Field } from "../ui/field";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
-import { Activity, ChevronRight, LayoutDashboard, ListTodo, Server } from "lucide-react";
-import { Label } from "../ui/label";
 import { Link, useLocation } from "@tanstack/react-router";
-import {
-  type NavCollapsible,
-  type NavItem,
-  type NavLink,
-  type NavGroup as NavGroupProps,
-} from './types'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Activity, ChevronRight, LayoutDashboard, Server } from "lucide-react";
+import { type ReactNode } from "react";
 import { Badge } from "../ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from "../ui/sidebar";
+import {
+    type NavCollapsible,
+    type NavGroup as NavGroupProps,
+    type NavItem,
+    type NavLink,
+} from './types';
 
 const navGroups = [
     {
@@ -38,9 +35,6 @@ export function AppSidebar() {
     <Sidebar collapsible={'icon'} variant={'inset'}>
         <SidebarHeader>
             <Logo />
-            {/* <div className='flex flex-row items-center justify-between gap-2 me-auto'>
-                
-            </div> */}
         </SidebarHeader>
         <SidebarContent>
             {/* <SidebarMenu> */}
@@ -99,85 +93,6 @@ function NavGroup({title, items}: NavGroupProps) {
         </SidebarGroup>
     )
 }
-
-function AppSidebarGroup() {
-    const [defaultSourceChecked, setDefaultSourceChecked] = useState(false);
-    const [defaultSource1Checked, setDefaultSource1Checked] = useState(false);
-
-    const defaultGroupChecked = useMemo(() => {
-        const selectedCount = Number(defaultSourceChecked) + Number(defaultSource1Checked);
-        if (selectedCount === 0) {
-            return false;
-        }
-        if (selectedCount === 2) {
-            return true;
-        }
-        return "indeterminate" as const;
-    }, [defaultSourceChecked, defaultSource1Checked]);
-
-    const handleDefaultGroupChange = (checked: boolean | "indeterminate") => {
-        const nextChecked = checked === true;
-        setDefaultSourceChecked(nextChecked);
-        setDefaultSource1Checked(nextChecked);
-    };
-
-    const handleDefaultSourceChange = (checked: boolean | "indeterminate") => {
-        setDefaultSourceChecked(checked === true);
-    };
-
-    const handleDefaultSource1Change = (checked: boolean | "indeterminate") => {
-        setDefaultSource1Checked(checked === true);
-    };
-
-    return (
-        <Collapsible asChild className='group/collapsible'>
-            <SidebarMenuItem>
-                <Field orientation={'horizontal'}>
-                    <Checkbox
-                        id="default-group"
-                        name="Default Group"
-                        checked={defaultGroupChecked}
-                        onCheckedChange={handleDefaultGroupChange}
-                    />
-                    <CollapsibleTrigger asChild> 
-                            <SidebarMenuButton className="p-0" tooltip={"Default group"}>
-                                Default Group
-                                <ChevronRight className='ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180' />
-                            </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                </Field>
-                <CollapsibleContent>
-                    <SidebarMenuSub>
-                        <SidebarMenuSubItem>
-                            <Field orientation={'horizontal'}>
-                                <Checkbox
-                                    id="default-source"
-                                    name="Default Source"
-                                    checked={defaultSourceChecked}
-                                    onCheckedChange={handleDefaultSourceChange}
-                                />
-                                <Label className="cursor-pointer" htmlFor="default-source">Default Source</Label>
-                            </Field>
-                        </SidebarMenuSubItem>
-
-                        <SidebarMenuSubItem>
-                            <Field orientation={'horizontal'}>
-                                <Checkbox
-                                    id="default-source1"
-                                    name="Default Source1"
-                                    checked={defaultSource1Checked}
-                                    onCheckedChange={handleDefaultSource1Change}
-                                />
-                                <Label className="cursor-pointer" htmlFor="default-source1">Default Source1</Label>
-                            </Field>
-                        </SidebarMenuSubItem>
-                    </SidebarMenuSub>
-                </CollapsibleContent>
-            </SidebarMenuItem>
-        </Collapsible>
-    )
-}
-
 
 function NavBadge({ children }: { children: ReactNode }) {
   return <Badge className='rounded-full px-1 py-0 text-xs'>{children}</Badge>
