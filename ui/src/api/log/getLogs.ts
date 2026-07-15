@@ -39,6 +39,10 @@ export const getLogs = async (variables: LogRequest): Promise<LogResponse> => {
         }
     )
 
+    data.stats.forEach(stat => {
+        stat.time = stat.time * 1000
+    });
+
     return data
 }
 

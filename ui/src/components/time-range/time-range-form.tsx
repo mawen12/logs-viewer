@@ -7,10 +7,11 @@ import { Field, FieldError, FieldLabel } from "../ui/field";
 import { TimePickerField } from "./time-picker-field";
 import { cn } from "@/lib/utils";
 
-const DATE_TIME_FORMAT_HINT = "时间格式必须为 YYYY-MM-DD HH:mm:ss"
+const DATE_TIME_FORMAT_HINT = "时间格式必须为 YYYY-MM-DD HH:mm"
 
 function isStrictDateTime(value: string) {
-    const matched = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/.exec(value)
+    // const matched = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/.exec(value)
+    const matched = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/.exec(value)
     if (!matched) {
         return false
     }
@@ -20,9 +21,10 @@ function isStrictDateTime(value: string) {
     const day = Number(matched[3])
     const hour = Number(matched[4])
     const minute = Number(matched[5])
-    const second = Number(matched[6])
+    // const second = Number(matched[6])
 
-    const date = new Date(year, month - 1, day, hour, minute, second)
+    // const date = new Date(year, month - 1, day, hour, minute, second)
+    const date = new Date(year, month - 1, day, hour, minute)
 
     return (
         !Number.isNaN(date.getTime()) &&
@@ -30,8 +32,9 @@ function isStrictDateTime(value: string) {
         date.getMonth() + 1 === month &&
         date.getDate() === day &&
         date.getHours() === hour &&
-        date.getMinutes() === minute &&
-        date.getSeconds() === second
+        date.getMinutes() === minute 
+        // &&
+        // date.getSeconds() === second
     )
 }
 

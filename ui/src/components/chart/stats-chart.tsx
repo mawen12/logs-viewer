@@ -5,6 +5,8 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } f
 import { cn } from "@/lib/utils";
 import { useLogs } from "@/features/home/components/logs-provider";
 import { toDateTimeLocalValue } from "@/lib/time";
+import { useLogStore } from "@/store/useLogStore";
+import { useQueryStore } from "@/store/use-query-store";
 
 export interface StatsChartProps extends HTMLAttributes<HTMLDivElement> {
     data?: ChartData<{
@@ -32,7 +34,8 @@ export function StatsChart({
         minute: '2-digit',
     })
 }: StatsChartProps) {
-    const {setTimeRange} = useLogs()
+    const {refetch} = useLogs()
+    const {setTimeRange} = useQueryStore()
 
     const [left, setLeft] = useState<number>()
     const [right, setRight] = useState<number>()
@@ -71,6 +74,7 @@ export function StatsChart({
                             })
                             setLeft(undefined)
                             setRight(undefined)
+                            refetch()
                         }
                     }
                 }}

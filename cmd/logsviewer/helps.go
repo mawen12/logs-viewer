@@ -33,7 +33,8 @@ func (app *Application) readTime(qs url.Values, key string, defaultTime time.Tim
 	}
 
 	// because index.log use this format: 2006-01-02-15:04
-	t, err := time.Parse(constant.LayoutDateTimeMinuteDash, s)
+	// t, err := time.Parse(constant.LayoutDateTimeMinuteDash, s)
+	t, err := time.Parse(constant.LayoutDateTimeMinute, s)
 	if err != nil {
 		return defaultTime
 	}

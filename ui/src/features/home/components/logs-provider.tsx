@@ -38,6 +38,7 @@ export function LogsProvider({ children }: LogsProviderProps) {
             limit,
             from: startTime,
             to: endTime,
+            refresh: false,
             sources: sources
         })
 
@@ -45,7 +46,7 @@ export function LogsProvider({ children }: LogsProviderProps) {
         setLogs(messageComposes ?? [])
         setStats(stats ?? [])
 
-    }, [setLogs, setStats, query, limit, timeRange, sources])
+    }, [setLogs, setStats, query, limit, timeRange, sources, startTime, endTime])
 
     const contextValue = useMemo(() => ({
         logs,

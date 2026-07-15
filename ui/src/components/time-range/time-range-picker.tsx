@@ -48,9 +48,6 @@ export function TimeRangePicker() {
     const { timeRange, setTimeRange, startTime, setStartTime, endTime, setEndTime } = useQueryStore()
     const [open, setOpen] = useState(false)
     const [selected, _setSelected] = useState<TimeRangeValue | undefined>(TIMERANGE_OPTIONS[0].value)
-    // const initialRange = useMemo(() => buildRange(TIMERANGE_OPTIONS[0].value), [])
-    // const [startTime, setStartTime] = useState(initialRange.start)
-    // const [endTime, setEndTime] = useState(initialRange.end)
 
     // 选择快捷时间范围 -> 更新 timeRange
     const setSelected = useCallback((value: string) => {

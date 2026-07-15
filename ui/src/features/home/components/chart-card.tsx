@@ -3,71 +3,73 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 import { useState } from 'react';
+import { useLogs } from './logs-provider';
 
-const stats = [
-    {
-        "time": 1783682520000,
-        "count": 305
-    },
-    {
-        "time": 1783682580000,
-        "count": 554
-    },
-    {
-        "time": 1783682640000,
-        "count": 301
-    },
-    {
-        "time": 1783682700000,
-        "count": 310
-    },
-    {
-        "time": 1783682760000,
-        "count": 563
-    },
-    {
-        "time": 1783682820000,
-        "count": 263
-    },
-    {
-        "time": 1783682880000,
-        "count": 318
-    },
-    {
-        "time": 1783682940000,
-        "count": 528
-    },
-    {
-        "time": 1783683000000,
-        "count": 414
-    },
-    {
-        "time": 1783683060000,
-        "count": 280
-    },
-    {
-        "time": 1783683120000,
-        "count": 563
-    },
-    {
-        "time": 1783683180000,
-        "count": 257
-    },
-    {
-        "time": 1783683240000,
-        "count": 328
-    },
-    {
-        "time": 1783683300000,
-        "count": 603
-    },
-    {
-        "time": 1783683360000,
-        "count": 288
-    }
-]
+// const stats = [
+//     {
+//         "time": 1783682520000,
+//         "count": 305
+//     },
+//     {
+//         "time": 1783682580000,
+//         "count": 554
+//     },
+//     {
+//         "time": 1783682640000,
+//         "count": 301
+//     },
+//     {
+//         "time": 1783682700000,
+//         "count": 310
+//     },
+//     {
+//         "time": 1783682760000,
+//         "count": 563
+//     },
+//     {
+//         "time": 1783682820000,
+//         "count": 263
+//     },
+//     {
+//         "time": 1783682880000,
+//         "count": 318
+//     },
+//     {
+//         "time": 1783682940000,
+//         "count": 528
+//     },
+//     {
+//         "time": 1783683000000,
+//         "count": 414
+//     },
+//     {
+//         "time": 1783683060000,
+//         "count": 280
+//     },
+//     {
+//         "time": 1783683120000,
+//         "count": 563
+//     },
+//     {
+//         "time": 1783683180000,
+//         "count": 257
+//     },
+//     {
+//         "time": 1783683240000,
+//         "count": 328
+//     },
+//     {
+//         "time": 1783683300000,
+//         "count": 603
+//     },
+//     {
+//         "time": 1783683360000,
+//         "count": 288
+//     }
+// ]
 
 export function ChartCard() {
+    const {stats} = useLogs()
     const [show, setShow] = useState<boolean>(true);
 
     const toggleShow = (e: React.MouseEvent<HTMLButtonElement>) => {

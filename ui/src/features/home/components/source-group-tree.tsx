@@ -29,7 +29,7 @@ function isChildrenNode(node: TreeNode) {
 }
 
 export function SourceGroupTree({ nodes }: { nodes: TreeNode[] }) {
-    const { sources, updateSource, hasSource } = useQueryStore()
+    const { sources, updateSource, hasSource, startTime, endTime } = useQueryStore()
 
     const parentMap = useMemo((): Map<string, TreeNode> => {
         const parentMap = new Map<string, TreeNode>()
@@ -51,6 +51,8 @@ export function SourceGroupTree({ nodes }: { nodes: TreeNode[] }) {
             ))}
 
             {sources.size}
+            {startTime}
+            {endTime}
         </ul>
     )
 }
