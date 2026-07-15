@@ -1,5 +1,5 @@
 storage:
-  path: "/home/mawen/Documents/github/mawen12/logs-viewer/data/data.db"
+  path: "/Users/mawen/Documents/github/mawen12/logs-viewer/data/data.db"
 
 sources:
   - name: "app.log"

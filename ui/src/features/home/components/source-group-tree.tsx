@@ -3,8 +3,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
+import { useQueryStore } from "@/store/use-query-store";
 import { ChevronRight } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 export interface NodeBase {
     id: string
@@ -28,6 +29,7 @@ function isChildrenNode(node: TreeNode) {
 }
 
 export function SourceGroupTree({ nodes }: { nodes: TreeNode[] }) {
+    const { sources, updateSource, hasSource } = useQueryStore()
 
     const parentMap = useMemo((): Map<string, TreeNode> => {
         const parentMap = new Map<string, TreeNode>()
@@ -38,62 +40,37 @@ export function SourceGroupTree({ nodes }: { nodes: TreeNode[] }) {
         return parentMap
     }, [nodes])
 
-    
-
-    const [selected, _setSelected] = useState<Set<string>>(new Set<string>())
     const toggleSelect = useCallback((node: TreeNode) => {
-        _setSelected((prev) => {
-            const next = new Set(prev)
-
-            if (next.has(node.id)) {
-                next.delete(node.id)
-                if (node.type == "group") {
-                    node.children.forEach((c) => next.delete(c.id))
-                } else {
-                    next.delete(node.parentId)
-                }
-            } else {
-                next.add(node.id)
-                if (node.type === "group") {
-                    node.children.forEach((c) => next.add(c.id))
-                } else {
-                    const parentNode = parentMap.get(node.parentId)
-                    if (parentNode?.children.every((c) => next.has(c.id))) {
-                        next.add(node.parentId)
-                    }
-                }
-            }
-
-            return next
-        })
-    }, [parentMap])
-
-
-    const isSelected = useCallback((node: TreeNode): boolean => selected.has(node.id), [selected])
+            updateSource(node, parentMap.get(node?.parentId))
+    }, [parentMap, updateSource])
 
     return (
         <ul>
             {nodes.map((node) => (
-                <TreeItem key={node.id} node={node} checkSelected={isSelected} toggleSelect={toggleSelect} />
+                <TreeItem key={node.id} node={node} checkSelected={() => hasSource(node.id)} selected={hasSource(node.id)} toggleSelect={toggleSelect} />
             ))}
+
+            {sources.size}
         </ul>
     )
 }
 
-function TreeItem({ node, checkSelected, toggleSelect }: { node: TreeNode, checkSelected: (node: TreeNode) => boolean, toggleSelect: (node: TreeNode) => void }) {
+function TreeItem({ node, checkSelected, selected, toggleSelect }: { node: TreeNode, checkSelected: (node: TreeNode) => boolean, selected: boolean, toggleSelect: (node: TreeNode) => void }) {
+    const { sources, hasSource } = useQueryStore()
+
     const isChecked = useMemo(() => {
         if (node.type === "group") {
-            if (checkSelected(node)) {
+            if (selected) {
                 return true
-            } else if (node.children.some((c) => checkSelected(c))) {
+            } else if (node.children.some((c) => hasSource(c.id))) {
                 return "indeterminate" as const
             } else {
                 return false
             }
         } else {
-            return checkSelected(node)
+            return selected
         }
-    }, [node, checkSelected])
+    }, [sources])
 
     if (isChildrenNode(node)) {
         return (
@@ -131,7 +108,7 @@ function TreeItem({ node, checkSelected, toggleSelect }: { node: TreeNode, check
                 <CollapsibleContent>
                     <ul className="ml-1 border-l pl-1">
                         {node.children!.map((child) => (
-                            <TreeItem key={child.id} node={child} checkSelected={checkSelected} toggleSelect={toggleSelect} />
+                            <TreeItem key={child.id} node={child} checkSelected={checkSelected} selected={hasSource(child.id)} toggleSelect={toggleSelect} />
                         ))}
                     </ul>
                 </CollapsibleContent>

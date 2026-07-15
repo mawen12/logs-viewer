@@ -2,7 +2,6 @@ import type { FetchLogsParams, MessageCompose, Stat } from "@/api/type";
 import { create } from "zustand";
 
 type LogStore = {
-    
     loading: boolean,
     setLoading: (loading: boolean) => void,
     err: string | undefined,

@@ -1,4 +1,4 @@
-import { useGetLogs } from "@/api/logs/getLogs";
+import { useGetLogs } from "@/api/log/getLogs";
 import type { MessageCompose, Stat } from "@/api/type";
 import { type Mode, type TimeRangeValue } from "@/constant/time-range";
 import { useQueryStore } from "@/store/use-query-store";
@@ -33,7 +33,7 @@ export function LogsProvider({ children }: LogsProviderProps) {
 
     const handleQuery = useCallback(async () => {
         setIsFetching(true)
-        const { messageCompose, stats } = await logsState.mutateAsync({
+        const { messageComposes, stats } = await logsState.mutateAsync({
             query,
             limit,
             from: startTime,
@@ -42,7 +42,7 @@ export function LogsProvider({ children }: LogsProviderProps) {
         })
 
         setIsFetching(false)
-        setLogs(messageCompose ?? [])
+        setLogs(messageComposes ?? [])
         setStats(stats ?? [])
 
     }, [setLogs, setStats, query, limit, timeRange, sources])
