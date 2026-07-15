@@ -1,33 +1,21 @@
-import type { Mode, TimeRangeValue } from "@/constant/time-range";
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { useGetLogs } from "@/api/logs/getLogs";
+import type { MessageCompose, Stat } from "@/api/type";
+import { type Mode, type TimeRangeValue } from "@/constant/time-range";
+import { useQueryStore } from "@/store/use-query-store";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 
 export type LogsProviderProps = {
     children: ReactNode
 }
 
 type LogsProviderState = {
-    query: string
-    setQuery: (query: string) => void
-    limit: number,
-    setLimit: (limit: number) => void
-    timeRange: TimeRange
-    setTimeRange: (timeRange: TimeRange) => void
+    logs: MessageCompose[]
+    stats: Stat[]
+    isFetching: boolean
+    refetch: () => Promise<void>
 }
 
-const initTimeRage = {
-    mode: "last", start: "5m"
-} as TimeRange
-
-const initLogsState = {
-    query: '',
-    setQuery: (query: string) => {},
-    limit: 100,
-    setLimit: (limit: number) => {},
-    timeRange: initTimeRage,
-    setTimeRange: (timeRange: TimeRange) => {}
-}
-
-const LogsContext = createContext<LogsProviderState>(initLogsState)
+const LogsContext = createContext<LogsProviderState | undefined>(undefined)
 
 export type TimeRange = {
     mode: Mode
@@ -35,19 +23,36 @@ export type TimeRange = {
     end?: string
 }
 
-export function LogsProvider({children}: LogsProviderProps) {
-    const [query, setQuery] = useState<string>('')
-    const [limit, setLimit] = useState<number>(100)
-    const [timeRange, setTimeRange] = useState<TimeRange>(initTimeRage)
-    
+export function LogsProvider({ children }: LogsProviderProps) {
+    const { query, limit, timeRange, startTime, endTime, sources } = useQueryStore()
+
+    const [logs, setLogs] = useState<MessageCompose[]>([])
+    const [stats, setStats] = useState<Stat[]>([])
+    const [isFetching, setIsFetching] = useState(false)
+    const logsState = useGetLogs({})
+
+    const handleQuery = useCallback(async () => {
+        setIsFetching(true)
+        const { messageCompose, stats } = await logsState.mutateAsync({
+            query,
+            limit,
+            from: startTime,
+            to: endTime,
+            sources: sources
+        })
+
+        setIsFetching(false)
+        setLogs(messageCompose ?? [])
+        setStats(stats ?? [])
+
+    }, [setLogs, setStats, query, limit, timeRange, sources])
+
     const contextValue = useMemo(() => ({
-        query,
-        setQuery,
-        limit,
-        setLimit,
-        timeRange,
-        setTimeRange,
-    }), [query, setQuery, limit, setLimit, timeRange, setTimeRange])
+        logs,
+        stats,
+        isFetching,
+        refetch: handleQuery
+    }), [logs, stats, isFetching, handleQuery])
 
     return (
         <LogsContext value={contextValue}>

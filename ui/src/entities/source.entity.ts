@@ -24,7 +24,7 @@ export const sourceTableEntity: DataTableEntity = {
             sortable: true,
             filterable: true,
             align: 'start',
-            className: 'ps-1 max-w-0 w-1/4 text-center',
+            className: 'ps-1 text-center',
             thClassName: 'text-center',
             tdClassName: 'text-break'
         },
@@ -34,7 +34,7 @@ export const sourceTableEntity: DataTableEntity = {
             sortable: true,
             filterable: true,
             align: 'start',
-            className: 'ps-1 max-w-0 w-1/4 text-center',
+            className: 'ps-1 text-center',
             thClassName: '',
             tdClassName: 'text-break'
         },
@@ -44,9 +44,19 @@ export const sourceTableEntity: DataTableEntity = {
             sortable: true,
             filterable: true,
             align: 'start',
-            className: 'ps-1 max-w-0 w-1/4 text-center',
+            className: 'ps-1 max-w-0 w-1/3 text-center',
             thClassName: '',
             tdClassName: 'text-break'
+        },
+        {
+            key: 'pattern',
+            title: 'Pattern',
+            sortable: true,
+            filterable: true,
+            align: 'start',
+            className: 'ps-1 max-w-0 w-1/3 text-center',
+            // thClassName: '',
+            // tdClassName: 'text-break'
         },
         {
             key: 'data-table-actions',

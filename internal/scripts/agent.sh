@@ -41,12 +41,17 @@ while [[ $# -gt 0 ]]; do
       shift
       shift
       ;;
-    # 待检索的结束时间  
+    # 待检索的结束时间 
     -t|--to) 
       to="$2"
       shift
       shift
       ;;
+    --awk-time-format)
+      awk_time_format="$2"
+      shift
+      shfit
+      ;;  
     -u|--lines-until) 
       lines_until="$2"
       shift

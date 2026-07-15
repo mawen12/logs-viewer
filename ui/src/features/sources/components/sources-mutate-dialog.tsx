@@ -18,6 +18,7 @@ const formSchema = z.object({
   name: z.string().min(1, 'Name is required').max(10, 'Name must less than 10'),
   group: z.string().min(1, 'Group is required.'),
   source: z.string().min(1, 'Source is required.'),
+  pattern: z.string().min(1, 'Pattern is required')
 })
 type SourceForm = z.infer<typeof formSchema>
 
@@ -36,6 +37,7 @@ export function SourcesMutateDialog({
       name: '',
       group: '',
       source: '',
+      pattern: '',
     },
   })
 
@@ -104,6 +106,19 @@ export function SourcesMutateDialog({
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel>Source</FieldLabel>
                 <Input {...field} placeholder='Enter a source' />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name='pattern'
+            render={({ field, fieldState }) => (
+              <Field data-invalid={fieldState.invalid}>
+                <FieldLabel>Pattern</FieldLabel>
+                <Input {...field} placeholder='Enter a pattern' />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}

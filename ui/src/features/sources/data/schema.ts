@@ -7,6 +7,7 @@ export const sourceSchema = z.object({
   name: z.string(),
   group: z.string(),
   source: z.string(),
+  pattern: z.string(),
   isConfiged: z.boolean().optional(),
 })
 

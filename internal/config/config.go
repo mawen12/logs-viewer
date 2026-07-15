@@ -56,6 +56,17 @@ func ValidateStorageConfig(config *Config) error {
 	return config.Storage.ValidateAndSetDefaults()
 }
 
+func ValidateSourcesConfig(config *Config) error {
+	if config.Sources != nil {
+		for _, source := range config.Sources {
+			if err := source.Validate(); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func ValidateWebConfig(config *Config) error {
 	if config.Web == nil {
 		config.Web = DefaultWeb()

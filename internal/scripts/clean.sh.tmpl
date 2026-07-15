@@ -1,8 +1,6 @@
 trap 'echo "Z:" 1>&2; echo "Z:"' EXIT
 
-echo 'A:'
-echo 'A:' 1>&2
-
+echo 'A:'; echo 'A:' 1>&2
 echo 'N:start clean {{ .PrefixPath }}'
 
 cd
@@ -16,8 +14,6 @@ rm -rf {{ .PrefixPath }}
 if [ $? -ne 0 ]; then
     echo 'E:1:clean {{ .PrefixPath }} failed' 1>&2
     exit 1
-else 
-    echo 'N:clean {{ .PrefixPath }} success'
 fi
 
 exit 0

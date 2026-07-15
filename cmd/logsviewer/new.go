@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 
 	"github.com/mawen12/logs-viewer/internal/config"
@@ -11,9 +12,10 @@ import (
 
 type Application struct {
 	*slog.Logger
-	config  *config.Config
-	hub     *ws.Hub
-	reader  *conn.Reader
+	config *config.Config
+	hub    *ws.Hub
+	// reader  *conn.Reader
+	conn    *conn.Manager
 	storage *storage.Storage
 }
 
@@ -23,15 +25,27 @@ func New(cfg *config.Config) *Application {
 		panic("store init failed " + err.Error())
 	}
 
+	storage.InitSources(cfg.Sources)
+
+	conn := conn.NewManager()
+	sources, err := storage.ListSource(context.Background())
+	if err != nil {
+		panic("list sources failed" + err.Error())
+	}
+
+	for _, source := range sources {
+		conn.Add(source)
+	}
+
 	return &Application{
 		config:  cfg,
 		hub:     ws.NewHub(),
-		reader:  conn.NewReader("", ""),
+		conn:    conn,
 		storage: storage,
 	}
 }
 
 func (app *Application) Close() {
-	app.reader.Close()
+	app.conn.Close()
 	app.hub.Close()
 }

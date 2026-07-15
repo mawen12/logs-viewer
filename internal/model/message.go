@@ -16,6 +16,7 @@ type QueryParam struct {
 	Refresh     bool
 	LineUtil    int
 	MaxNumLines int
+	Sources     []string
 	extParam    map[string]QueryParam
 }
 
@@ -34,11 +35,12 @@ func (param QueryParam) ToStr() string {
 }
 
 func (param QueryParam) String() string {
-	return fmt.Sprintf("{from: %s, to: %s, pattern: %s, MaxNumLines: %d}",
+	return fmt.Sprintf("{from: %s, to: %s, pattern: %s, MaxNumLines: %d, Sources: %s}",
 		param.FromStr(),
 		param.ToStr(),
 		param.Pattern,
 		param.MaxNumLines,
+		param.Sources,
 	)
 }
 

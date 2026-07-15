@@ -5,4 +5,5 @@ export const apiKeys = {
     add: () => [...apiKeys.items(), 'add'],
     delete: () => [...apiKeys.items(), 'delete'],
     update: () => [...apiKeys.items(), 'update'],
+    logs: () => [...apiKeys.items(), "logs"],
 }

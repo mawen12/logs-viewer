@@ -28,6 +28,7 @@ function isChildrenNode(node: TreeNode) {
 }
 
 export function SourceGroupTree({ nodes }: { nodes: TreeNode[] }) {
+
     const parentMap = useMemo((): Map<string, TreeNode> => {
         const parentMap = new Map<string, TreeNode>()
         nodes.forEach((node) => {
@@ -37,6 +38,7 @@ export function SourceGroupTree({ nodes }: { nodes: TreeNode[] }) {
         return parentMap
     }, [nodes])
 
+    
 
     const [selected, _setSelected] = useState<Set<string>>(new Set<string>())
     const toggleSelect = useCallback((node: TreeNode) => {

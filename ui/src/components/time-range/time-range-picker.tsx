@@ -1,14 +1,14 @@
 import { isTimeRangeValue, TIMERANGE_LABELS, TIMERANGE_OPTIONS, type Mode, type TimeRangeValue } from "@/constant/time-range";
 import { toDateTimeLocalValue } from "@/lib/time";
+import { useQueryStore } from "@/store/use-query-store";
 import { IconClockHour5 } from "@tabler/icons-react";
+import { Calendar } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { TimeRangeForm } from "./time-range-form";
 import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
-import { Calendar } from "lucide-react";
-import { useLogs } from "@/features/home/components/logs-provider";
+import { TimeRangeForm } from "./time-range-form";
 
 export type TimeRange = {
     mode: Mode
@@ -45,12 +45,12 @@ function buildRange(value: TimeRangeValue) {
 }
 
 export function TimeRangePicker() {
-    const { timeRange, setTimeRange } = useLogs()
+    const { timeRange, setTimeRange, startTime, setStartTime, endTime, setEndTime } = useQueryStore()
     const [open, setOpen] = useState(false)
     const [selected, _setSelected] = useState<TimeRangeValue | undefined>(TIMERANGE_OPTIONS[0].value)
-    const initialRange = useMemo(() => buildRange(TIMERANGE_OPTIONS[0].value), [])
-    const [startTime, setStartTime] = useState(initialRange.start)
-    const [endTime, setEndTime] = useState(initialRange.end)
+    // const initialRange = useMemo(() => buildRange(TIMERANGE_OPTIONS[0].value), [])
+    // const [startTime, setStartTime] = useState(initialRange.start)
+    // const [endTime, setEndTime] = useState(initialRange.end)
 
     // 选择快捷时间范围 -> 更新 timeRange
     const setSelected = useCallback((value: string) => {

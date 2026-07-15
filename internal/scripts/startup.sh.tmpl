@@ -1,8 +1,7 @@
 (
 trap 'echo "Z:" 1>&2; echo "Z:"' EXIT
 
-echo 'A:'
-echo 'A:' 1>&2
+echo 'A:'; echo 'A:' 1>&2
 echo 'N:start run startup.sh'
 
 cd
@@ -88,7 +87,4 @@ if [ $? -ne 0 ]; then
 else 
   echo 'N:startup ok'
 fi
-
-#echo "Z:" 1>&2
-#echo "Z:"
 )

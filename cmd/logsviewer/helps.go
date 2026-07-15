@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mawen12/logs-viewer/internal/constant"
@@ -47,6 +48,15 @@ func (app *Application) readBool(qs url.Values, key string, defaultBool bool) bo
 	}
 
 	return s == "true" || s == "1"
+}
+
+func (app *Application) readArray(qs url.Values, key string) []string {
+	s := qs.Get(key)
+	if s == "" {
+		return nil
+	}
+
+	return strings.Split(s, ",")
 }
 
 func (app *Application) writeJson(w http.ResponseWriter, r *http.Request, data any) {

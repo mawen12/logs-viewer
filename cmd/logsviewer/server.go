@@ -34,7 +34,7 @@ func (app *Application) Serve() error {
 
 		log.Println("shutting down server quit ", s.String())
 
-		app.reader.Clean(context.Background())
+		app.conn.Clean(context.Background())
 
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()

@@ -1,13 +1,11 @@
 package conn
 
 import (
-	"bufio"
 	"context"
 	"errors"
 	"fmt"
 	"log"
 	neturl "net/url"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -67,25 +65,25 @@ func NewReader(configPath string, mode string) *Reader {
 	}
 }
 
-func (r *Reader) LoadConfig() error {
-	file, err := os.Open(r.configPath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+// func (r *Reader) LoadConfig() error {
+// 	file, err := os.Open(r.configPath)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer file.Close()
 
-	log.Println("path prefix", r.prefixPath)
+// 	log.Println("path prefix", r.prefixPath)
 
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line != "" && strings.TrimSpace(line) != "" {
-			r.lines = append(r.lines, line)
-		}
-	}
+// 	scanner := bufio.NewScanner(file)
+// 	for scanner.Scan() {
+// 		line := scanner.Text()
+// 		if line != "" && strings.TrimSpace(line) != "" {
+// 			r.lines = append(r.lines, line)
+// 		}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (r *Reader) ParseConfig() error {
 	if len(r.lines) == 0 {
@@ -169,7 +167,7 @@ func (r *Reader) Query(ctx context.Context, param model.QueryParam) []model.Mess
 		if r.mode != "single" {
 			ws.QueryNotify(ctx, c.Url().stream, "use non-single mode to query")
 			var err error
-			newConn, err = c.NewInstance()
+			newConn, err = c.Copy()
 			if err != nil {
 				ws.QueryNotify(ctx, c.Url().stream, fmt.Sprintf("newInstance err: %v", err))
 				return nil, err
@@ -181,22 +179,22 @@ func (r *Reader) Query(ctx context.Context, param model.QueryParam) []model.Mess
 		return c.Query(ctx, param)
 	}
 
-	return r.parallelExecute(ctx, execute)
+	return r.parallelExecute(ctx, r.conns, execute)
 }
 
 func (r *Reader) Clean(ctx context.Context) []model.MessageCompose {
 	execute := func(ctx context.Context, c Conn) (*model.MessageCompose, error) {
 		return c.Clean(ctx)
 	}
-	return r.parallelExecute(ctx, execute)
+	return r.parallelExecute(ctx, r.conns, execute)
 }
 
 type executer func(ctx context.Context, c Conn) (*model.MessageCompose, error)
 
-func (r *Reader) parallelExecute(ctx context.Context, execute executer) []model.MessageCompose {
-	retChan := make(chan model.MessageCompose, len(r.conns))
+func (r *Reader) parallelExecute(ctx context.Context, conns []Conn, execute executer) []model.MessageCompose {
+	retChan := make(chan model.MessageCompose, len(conns))
 	wg := sync.WaitGroup{}
-	wg.Add(len(r.conns))
+	wg.Add(len(conns))
 
 	for _, conn := range r.conns {
 		background.Submit("reader-parallel-execute", func() {

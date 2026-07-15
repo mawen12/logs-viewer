@@ -14,7 +14,7 @@ import { useGetTreeSourcesQuery } from "@/api/sources/getTreeSources";
 
 export function Home() {
 
-    const {data, refetch, isFetching} = useGetTreeSourcesQuery()
+    const { data } = useGetTreeSourcesQuery()
 
     return (
         <LogsProvider>

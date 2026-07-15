@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"sort"
@@ -24,16 +23,15 @@ func (app *Application) query(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
 	param := model.QueryParam{
-		From:        app.readTime(query, "from", time.Time{}),
-		To:          app.readTime(query, "to", time.Time{}),
+		From:        app.readTime(query, "from", time.Now().Add(-15*time.Minute)),
+		To:          app.readTime(query, "to", time.Now()),
 		Refresh:     app.readBool(query, "refresh", false),
 		Pattern:     query.Get("query"),
-		MaxNumLines: app.readInt(query, "limit", 1),
+		Sources:     app.readArray(query, "sources"),
+		MaxNumLines: app.readInt(query, "limit", 100),
 	}
 
-	fmt.Println("param ", param.String())
-
-	queryResults := app.reader.Query(r.Context(), param)
+	queryResults := app.conn.Query(r.Context(), param)
 	statsMap := make(map[int64]int, 0)
 	for _, queryResult := range queryResults {
 		for _, stat := range queryResult.Stats {
@@ -101,6 +99,9 @@ func (app *Application) addSource(w http.ResponseWriter, r *http.Request) (inter
 	if source.Source == "" {
 		return nil, errors.New("source is required")
 	}
+	if source.Pattern == "" {
+		return nil, errors.New("pattern is required")
+	}
 
 	_, err := app.storage.AddSource(r.Context(), source)
 	return nil, err
@@ -139,6 +140,9 @@ func (app *Application) updateSource(w http.ResponseWriter, r *http.Request) (in
 	}
 	if source.Source == "" {
 		return nil, errors.New("source is required")
+	}
+	if source.Pattern == "" {
+		return nil, errors.New("pattern is required")
 	}
 
 	err = app.storage.UpdateSource(r.Context(), id, source)

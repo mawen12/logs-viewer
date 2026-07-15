@@ -3,12 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { useQueryStore } from "@/store/use-query-store";
 import { Search } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useLogs } from "./logs-provider";
 
 export function Query() {
-    const { query, setQuery, limit, setLimit } = useLogs()
+    const { query, setQuery, limit, setLimit } = useQueryStore()
+    const { refetch } = useLogs()
     const [_limit, _setLimit] = useState<number[]>([limit])
 
     const setLimitHandler = useCallback((value: number[]) => {
@@ -28,7 +30,7 @@ export function Query() {
                     <Label htmlFor="limit">Limit:<span className="text-green-600">({limit})</span></Label>
                     <Slider value={_limit} onValueChange={setLimitHandler} defaultValue={[100]} max={1000} min={10} step={20} />
                 </Field>
-                <Button variant={'outline'} size={'lg'} className="h-10 w-24">
+                <Button variant={'outline'} size={'lg'} className="h-10 w-24" onClick={() => refetch()}>
                     <Search />
                     Search
                 </Button>
