@@ -1,4 +1,5 @@
 import { ColorfulButton } from "@/components/business/ColorfulButton";
+import { ComposeLogs } from "@/components/business/ComposeLogs";
 import { CopyButton } from "@/components/business/CopyButton";
 import { DebugDrawer } from "@/components/business/DebugDrawer";
 import { DirectionButton } from "@/components/business/DirectionButton";
@@ -6,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconEye, IconEyeOff } from "@tabler/icons-react";
 import { useState } from "react";
-
 
 export function LogsCard() {
     const [show, setShow] = useState<boolean>(true);
@@ -31,9 +31,8 @@ export function LogsCard() {
                 </Button>
             </CardHeader>
             {show && <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-
-            </CardContent>
-            }
+                <ComposeLogs />
+            </CardContent>}
         </Card>
     )
 }

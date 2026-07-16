@@ -16,16 +16,13 @@ type DataTableRowActionsProps<TData> = {
   row: Row<TData>
   setOpen: (str: DialogType | null) => void
   setCurrentRow: (row: TData) => void
-  getCurrentRow?: (row: Row<TData>) => TData
 }
 
 export function DataTableRowActions<TData>({
   row,
   setOpen,
   setCurrentRow,
-  getCurrentRow = (tableRow) => tableRow.original
 }: DataTableRowActionsProps<TData>) {
-  const currentRow = getCurrentRow(row)
 
   return (
     <DropdownMenu modal={false}>
@@ -33,6 +30,7 @@ export function DataTableRowActions<TData>({
         <Button
           variant='ghost'
           className='flex h-8 w-8 p-0 data-[state=open]:bg-muted'
+          onClick={(event) => {event.stopPropagation()}}
         >
           <Ellipsis className='size-4'/>
           <span className='sr-only'>Open menu</span>
@@ -40,9 +38,10 @@ export function DataTableRowActions<TData>({
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end' className='w-40'>
         <DropdownMenuItem
-          onClick={() => {
-            setCurrentRow(currentRow)
+          onClick={(event) => {
+            setCurrentRow(row.original)
             setOpen('update')
+            event.stopPropagation()
           }}
           className='cursor-pointer'
         >
@@ -52,9 +51,10 @@ export function DataTableRowActions<TData>({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant='destructive'
-          onClick={() => {
-            setCurrentRow(currentRow)
+          onClick={(event) => {
+            setCurrentRow(row.original)
             setOpen('delete')
+            event.stopPropagation()
           }}
           className='cursor-pointer'
         >

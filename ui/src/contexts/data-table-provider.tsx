@@ -1,13 +1,16 @@
 import { DataTableColumnHeader } from "@/components/data-table";
 import { DataTableRowActions, type DialogType } from "@/components/data-table/row-actions";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { DataTableEntity } from "@/types/data-table";
-import { getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, type ColumnDef, type ColumnFiltersState, type PaginationState, type Row, type SortingState, type Table, type VisibilityState } from "@tanstack/react-table";
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import { getCoreRowModel, getExpandedRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, type ColumnDef, type ColumnFiltersState, type PaginationState, type SortingState, type VisibilityState } from "@tanstack/react-table";
+import { ChevronRight, ChevronsRight } from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
+import { DataTableContext, type DataTableProviderState } from "./use-datatable";
 
 export type DataTableProviderProps<TData> = {
     children: ReactNode
-    entity: DataTableEntity,
+    entity: DataTableEntity<TData>,
     data: TData[]
     loading: boolean
     refetchHandler: () => void
@@ -16,16 +19,7 @@ export type DataTableProviderProps<TData> = {
     globalActionsHandler: () => void
     setOpen: (value: DialogType | null) => void
     setCurrentRow: (value: TData | null) => void
-    getCurrentRow: (value: Row<TData>) => TData
 }
-
-type DataTableProviderState<TData> = {
-    table: Table<TData>
-    loading: boolean
-    refetchHandler: () => void
-}
-
-const DataTableContext = createContext<DataTableProviderState<unknown> | undefined>(undefined)
 
 export function DataTableProvider<TData>({
     children,
@@ -38,7 +32,6 @@ export function DataTableProvider<TData>({
     globalActionsHandler,
     setOpen,
     setCurrentRow,
-    getCurrentRow,
 }: DataTableProviderProps<TData>
 ) {
     const [rowSelection, setRowSelection] = useState({})
@@ -67,10 +60,32 @@ export function DataTableProvider<TData>({
                     cell: ({ row }) => (
                         <Checkbox
                             checked={row.getIsSelected()}
-                            onCheckedChange={(value) => row.toggleSelected(!!value)}
+                            onCheckedChange={(value) => {
+                                row.toggleSelected(value === true)
+                            }}
+                            onClick={(event) => {
+                                // stop event, prevent trigger the expand or other event
+                                event.stopPropagation()
+                            }}
                             aria-label='Select row'
                             className='translate-y-0.5'
                         />
+                    ),
+                    enableSorting: false,
+                    enableHiding: false,
+                }
+            } else if (header.key === 'data-table-expand') {
+                return {
+                    id: 'expand',
+                    header: ({ table }) => (
+                        <Button variant={'ghost'} title="收起" onClick={() => table.toggleAllRowsExpanded(false)}>
+                            <ChevronsRight />
+                        </Button>
+                    ),
+                    cell: ({ row }) => (
+                        <Button variant={'ghost'} title={row.getIsExpanded() ? '收起' : '展开'} onClick={() => row.toggleExpanded(!row.getIsExpanded())}>
+                            <ChevronRight className={row.getIsExpanded() ? 'rotate-90' : ''}/>
+                        </Button>
                     ),
                     enableSorting: false,
                     enableHiding: false,
@@ -86,7 +101,6 @@ export function DataTableProvider<TData>({
                             row={row}
                             setOpen={setOpen}
                             setCurrentRow={setCurrentRow}
-                            getCurrentRow={getCurrentRow}
                         />
                     ),
                     enableHiding: false,
@@ -105,9 +119,9 @@ export function DataTableProvider<TData>({
                 enableHiding: false,
             }
         })
-    }, [entity.headers, setOpen, getCurrentRow, setCurrentRow])
+    }, [entity.headers, setOpen, setCurrentRow])
 
-    const table = useReactTable({
+    const table = useReactTable<TData>({
         data: data ?? [],
         columns: columns,
         state: {
@@ -129,6 +143,8 @@ export function DataTableProvider<TData>({
 
             return id.includes(searchValue) || title.includes(searchValue)
         },
+        getRowCanExpand: () => true,
+        getExpandedRowModel: getExpandedRowModel(),
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -140,20 +156,12 @@ export function DataTableProvider<TData>({
         onColumnFiltersChange: setColumnsFilters,
     })
 
-
     return (
-        <DataTableContext.Provider
-            value={{ table, loading, refetchHandler } as DataTableProviderState<unknown>}
+        <DataTableContext
+            value={{ entity, table, loading, refetchHandler } as DataTableProviderState<unknown>}
         >
             {children}
-        </DataTableContext.Provider>
+        </DataTableContext>
     )
 }
 
-export const useDataTable = <TData,>() => {
-    const context = useContext(DataTableContext) as DataTableProviderState<TData> | undefined
-
-    if (!context) throw new Error('useDataTable must be used within a DataTableProvider')
-
-    return context
-}

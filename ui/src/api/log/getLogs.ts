@@ -1,7 +1,7 @@
 import { useMutation, useQuery, type QueryOptions, type UseQueryResult } from "@tanstack/react-query";
 import { axiosInstance } from "@/api/axiosInstance";
 import { apiKeys } from "@/api/apiKeys";
-import type { MessageCompose, Stat } from "../type";
+import type { MessageCompose, Stat } from "@/types/log";
 
 export interface LogRequest {
     query: string

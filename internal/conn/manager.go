@@ -14,6 +14,7 @@ import (
 )
 
 type Manager struct {
+	sync.RWMutex
 	path    string
 	sources map[string]model.Source
 	conns   map[string]Conn
@@ -38,6 +39,8 @@ func (m *Manager) Add(source model.Source) error {
 		return nil
 	}
 
+	m.Lock()
+	defer m.Unlock()
 	parsedUrl, err := parse(source.Source)
 	if err != nil {
 		return err
@@ -64,10 +67,20 @@ func (m *Manager) Remove(source model.Source) error {
 		return nil
 	}
 
+	m.Lock()
+	defer m.Unlock()
+
 	conn.Close()
 	delete(m.sources, source.ID)
 	delete(m.conns, source.ID)
 	return nil
+}
+
+func (m *Manager) Get(source model.Source) (Conn, bool) {
+	m.RLock()
+	defer m.RUnlock()
+	conn, ok := m.conns[source.ID]
+	return conn, ok
 }
 
 func (m *Manager) Query(ctx context.Context, param model.QueryParam) []model.MessageCompose {

@@ -1,4 +1,4 @@
-import { useSnack } from "@/contexts/snackbar-provider";
+import { useSnack } from "@/contexts/use-snackbar";
 import type { ReactNode } from "react";
 
 export function useCopyToClipboard() {

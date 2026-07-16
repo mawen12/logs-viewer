@@ -1,8 +1,8 @@
-import { useWebsocket } from "@/contexts/websocket-provider";
 import { useWebsocketStore } from "@/hooks/use-websocket-store";
 import { IconPlug, IconPlugX } from '@tabler/icons-react';
 import { useMemo } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { useWebsocket } from "@/contexts/use-websocket";
 
 
 export function WebsocketButton() {

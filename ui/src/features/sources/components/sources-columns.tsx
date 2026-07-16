@@ -105,7 +105,6 @@ export const columns = (
         row={row}
         setOpen={setOpen}
         setCurrentRow={setCurrentRow}
-        getCurrentRow={(tableRow) => sourceSchema.parse(tableRow.original)}
       />
     ),
   },

@@ -1,10 +1,10 @@
-import { createContext, useContext, useEffect, useState, useMemo } from 'react'
-import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
+import { getCookie, removeCookie, setCookie } from '@/lib/cookies';
+import { useEffect, useMemo, useState } from 'react';
+import { DEFAULT_THEME, ThemeContext } from './use-theme';
 
 export type Theme = 'dark' | 'light' | 'system'
 type ResolvedTheme = Exclude<Theme, 'system'>
 
-const DEFAULT_THEME = 'system'
 const THEME_COOKIE_NAME = 'vite-ui-theme'
 const THEME_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 // 1 year
 
@@ -14,23 +14,13 @@ type ThemeProviderProps = {
   storageKey?: string
 }
 
-type ThemeProviderState = {
+export type ThemeProviderState = {
   defaultTheme: Theme
   resolvedTheme: ResolvedTheme
   theme: Theme
   setTheme: (theme: string) => void
   resetTheme: () => void
 }
-
-const initialState: ThemeProviderState = {
-  defaultTheme: DEFAULT_THEME,
-  resolvedTheme: 'light',
-  theme: DEFAULT_THEME,
-  setTheme: () => null,
-  resetTheme: () => null,
-}
-
-const ThemeContext = createContext<ThemeProviderState>(initialState)
 
 export function ThemeProvider({
   children,
@@ -100,13 +90,4 @@ export function ThemeProvider({
       {children}
     </ThemeContext>
   )
-}
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useTheme = () => {
-  const context = useContext(ThemeContext)
-
-  if (!context) throw new Error('useTheme must be used within a ThemeProvider')
-
-  return context
 }

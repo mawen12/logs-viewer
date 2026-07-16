@@ -1,11 +1,10 @@
-import { useEffect, useState, type HTMLAttributes } from "react";
+import { useState, type HTMLAttributes } from "react";
 import { Bar, BarChart, CartesianGrid, ReferenceArea, XAxis, YAxis } from "recharts";
 import type { ChartData } from "recharts/types/state/chartDataSlice";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "../ui/chart";
 import { cn } from "@/lib/utils";
 import { useLogs } from "@/features/home/components/logs-provider";
 import { toDateTimeLocalValue } from "@/lib/time";
-import { useLogStore } from "@/store/useLogStore";
 import { useQueryStore } from "@/store/use-query-store";
 
 export interface StatsChartProps extends HTMLAttributes<HTMLDivElement> {
@@ -106,7 +105,7 @@ export function StatsChart({
                     axisLine={true}
                     tickMargin={8}
                     width={48}
-                    domain={['auto', 'auto']}
+                    domain={[0, (dataMax: number) => Math.max(1, dataMax)]}
                     // 不显示小数点
                     allowDecimals={false}
                 />
@@ -115,7 +114,7 @@ export function StatsChart({
                         <ChartTooltipContent
                             className="w-37.5"
                             nameKey="count"
-                            labelFormatter={(value, payload) => {
+                            labelFormatter={(_value, payload) => {
                                 const timestamp = payload?.[0]?.payload?.time;
                                 return new Date(timestamp).toLocaleDateString('zh-CN', {
                                     month: 'short',

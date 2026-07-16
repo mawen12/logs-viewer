@@ -1,18 +1,18 @@
 storage:
-  path: "/Users/mawen/Documents/github/mawen12/logs-viewer/data/data.db"
+  path: "/home/mawen/Documents/github/mawen12/logs-viewer/data/data.db"
 
 sources:
   - name: "app.log"
     group: "local"
-    source: "cmd://127.0.0.1:/Users/mawen/logs/app.log"
+    source: "cmd://127.0.0.1:/home/mawen/logs/app.log"
     pattern: "yyyy-MM-dd HH:mm:ss,SSS"
   - name: "single.log"
     group: "local"
-    source: "cmd://127.0.0.1:/Users/mawen/logs/single.log"
+    source: "cmd://127.0.0.1:/home/mawen/logs/single.log"
     pattern: "yyyy-MM-dd HH:mm:ss,SSS"
   - name: "monitor.log"
     group: "local"
-    source: "cmd://127.0.0.1:/Users/mawen/logs/monitor.log"
+    source: "cmd://127.0.0.1:/home/mawen/logs/monitor.log"
     pattern: "yyyy-MM-dd HH:mm:ss,SSS"
   # - name: "app.log"
   #   group: "remote"

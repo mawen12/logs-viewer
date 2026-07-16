@@ -1,4 +1,3 @@
-import type { FetchLogsParams } from "@/api/type";
 import type { WebsocketEvent } from "@/contexts/websocket-provider";
 import { useWebsocketStore, type WebsocketQueryEvent } from "@/hooks/use-websocket-store";
 import { useAppStore } from "@/store/useAppStore";
@@ -15,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Field } from "@/components/ui/field";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ExecuteButton } from "@/components/business/ExecuteButton";
+import type { FetchLogsParams } from "@/types/log";
 
 export function QueryCard() {
     const { type, range, timeParams } = useTimeStore();

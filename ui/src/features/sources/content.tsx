@@ -1,10 +1,9 @@
 import { DataTableProvider } from "@/contexts/data-table-provider";
-import { sourceTableEntity } from "@/entities/source.entity";
 import type { HTMLAttributes } from "react";
 import { SourcesDataTable } from "./components/sources-data-table";
 import { useSources } from "./components/sources-provider";
-import { SourcesTable } from "./components/sources-table";
 import { sourceSchema } from "./data/schema";
+import { sourceTableEntity } from "@/entities/source.entity";
 
 export type SourcesContentProps = HTMLAttributes<HTMLDivElement>
 
@@ -13,7 +12,6 @@ export function SourcesContent({ className, ...props }: SourcesContentProps) {
 
     return (
         <div className={className} {...props}>
-            {/* <SourcesTable data={data} /> */}
             <DataTableProvider
                 entity={sourceTableEntity}
                 data={data}
@@ -24,7 +22,6 @@ export function SourcesContent({ className, ...props }: SourcesContentProps) {
                 globalActionsHandler={() => { }}
                 setOpen={setOpen}
                 setCurrentRow={setCurrentRow}
-                getCurrentRow={(tableRow) => sourceSchema.parse(tableRow.original)}
             >
                 <SourcesDataTable />
             </DataTableProvider>

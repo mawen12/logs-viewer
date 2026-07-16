@@ -1,4 +1,3 @@
-import type { MessageCompose } from "@/api/type";
 import { CardLogs } from "@/components/business/CardLogs";
 import { ColorfulButton } from "@/components/business/ColorfulButton";
 import { ComposeLogs } from "@/components/business/ComposeLogs";
@@ -8,6 +7,7 @@ import { DebugDrawer } from "@/components/business/DebugDrawer";
 import { DirectionButton } from "@/components/business/DirectionButton";
 import { useAppStore } from "@/store/useAppStore";
 import { useLogStore } from "@/store/useLogStore";
+import type { MessageCompose } from "@/types/log";
 import { useEffect, useMemo, useState } from "react";
 
 export function MixedLogsCard() {

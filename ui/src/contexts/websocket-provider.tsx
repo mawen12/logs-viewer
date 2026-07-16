@@ -1,5 +1,6 @@
 import { useWebsocketStore } from "@/hooks/use-websocket-store";
-import { createContext, useCallback, useContext, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { WebsocketContext } from "./use-websocket";
 
 type WebsocketProviderProps = {
     children: React.ReactNode
@@ -15,9 +16,13 @@ export interface WebsocketContextProps {
     err: Event | null
 }
 
-const WebsocketContext = createContext<WebsocketContextProps>({ ws: undefined, status: "closed", err: null });
+export type WsStatus = "connecting" | "open" | "closing" | "closed";
 
-type WsStatus = "connecting" | "open" | "closing" | "closed";
+export type WebsocketProviderState = {
+    ws: WebSocket | undefined
+    status: WsStatus
+    err: Event | null
+}
 
 export function WebsocketProvider({ children }: WebsocketProviderProps) {
     const [ws, setWs] = useState<WebSocket | undefined>(undefined);
@@ -51,19 +56,19 @@ export function WebsocketProvider({ children }: WebsocketProviderProps) {
         setWs(inst)
     }, [ws, notify])
 
-    // const disconnect = useCallback(() => {
-    //     if (!ws) return;
-    //     setStatus("closing");
-    //     ws.close(1000, "manual close");
-    // }, [ws])
+    const disconnect = useCallback(() => {
+        if (!ws) return;
+        setStatus("closing");
+        ws.close(1000, "manual close");
+    }, [ws])
 
-    // useEffect(() => {
-    //     connect();
+    useEffect(() => {
+        connect();
 
-    //     return () => {
-    //         ws?.close(1000, "unmount")
-    //     }
-    // }, [connect, ws]);
+        return () => {
+            ws?.close(1000, "unmount")
+        }
+    }, [connect, ws]);
 
     const value = {
         ws,
@@ -72,18 +77,8 @@ export function WebsocketProvider({ children }: WebsocketProviderProps) {
     }
 
     return (
-        <WebsocketContext.Provider value={value}>
+        <WebsocketContext value={value}>
             {children}
-        </WebsocketContext.Provider>
+        </WebsocketContext>
     )
-}
-
-export function useWebsocket() {
-    const context = useContext(WebsocketContext)
-
-    if (context === undefined) {
-        throw new Error("useWebsocket must be used within a WebsocketProvider")
-    }
-
-    return context
 }

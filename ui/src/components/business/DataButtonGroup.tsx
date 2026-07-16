@@ -1,8 +1,8 @@
-import type { MessageCompose } from "@/api/type";
 import { MoreHorizontalIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { ButtonGroup } from "../ui/button-group";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import type { MessageCompose } from "@/types/log";
 
 export type DataType = MessageCompose
 

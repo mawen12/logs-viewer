@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
+import type { Row } from "@tanstack/react-table";
 
-export interface DataTableEntity {
+export interface DataTableEntity<TData> {
     id: string
     itemValue: string
     showToolbar: boolean
     headers: DataTableEntityHeader[]
-    rowAction?: DataTableEntityRowAction
+    rowAction?: DataTableEntityRowAction<TData>
     massActions?: DataTableEntityAction[]
     globalActions?: DataTableEntityAction[]
     getAnchor?: (item) => void
@@ -29,7 +30,7 @@ export interface DataTableEntityAction {
     icon: ReactNode
 }
 
-export interface DataTableEntityRowAction {
+export interface DataTableEntityRowAction<TData> {
     type: string
-    component: ReactNode
+    component: (row: Row<TData>) => ReactNode
 }

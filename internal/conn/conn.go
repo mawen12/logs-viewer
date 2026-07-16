@@ -11,6 +11,7 @@ import (
 	"log"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/mawen12/logs-viewer/internal/model"
 	"github.com/mawen12/logs-viewer/internal/scripts"
@@ -20,6 +21,8 @@ import (
 
 type Conn interface {
 	Url() ParsedUrl
+	Timezone() string
+	LogLine() (string, string)
 	Copy() (Conn, error)
 	Start(context.Context) (*model.MessageCompose, error)
 	Index(context.Context) (*model.MessageCompose, error)
@@ -63,8 +66,11 @@ type CommonConn struct {
 	stdout, stderr       io.Reader
 	stdoutBuf, stderrBuf *bufio.Reader
 
-	exts   map[string]string
-	parser *LogParser
+	// exts   map[model.ExtKey]string
+	Loc          *time.Location
+	FirstLogFile string
+	LastLogFile  string
+	parser       *LogParser
 }
 
 func NewCommonConn(prefixPath string, url ParsedUrl, stdin io.WriteCloser, stdout, stderr io.Reader) *CommonConn {
@@ -80,9 +86,16 @@ func NewCommonConn(prefixPath string, url ParsedUrl, stdin io.WriteCloser, stdou
 		stderr:     stderr,
 		stdoutBuf:  stdoutBuf,
 		stderrBuf:  stderrBuf,
-		exts:       make(map[string]string),
-		parser:     &LogParser{},
+		// exts:       make(map[model.ExtKey]string),
+		parser: &LogParser{},
 	}
+}
+
+func (conn *CommonConn) Timezone() string {
+	return conn.Loc.String()
+}
+func (conn *CommonConn) LogLine() (string, string) {
+	return conn.FirstLogFile, conn.LastLogFile
 }
 
 func (conn *CommonConn) Url() ParsedUrl {
@@ -237,7 +250,15 @@ Loop:
 					Count: ret.Count,
 				})
 			case *model.ExtRet:
-				conn.exts[ret.Key] = ret.Value
+				// conn.exts[ret.Key] = ret.Value
+				switch ret.Key {
+				case model.Timezone:
+					conn.Loc = ret.Value.(*time.Location)
+				case model.FirstLogLine:
+					conn.FirstLogFile = ret.Value.(string)
+				case model.LastLogLine:
+					conn.LastLogFile = ret.Value.(string)
+				}
 			case *model.DebugRet:
 				ws.QueryNotify(ctx, conn.Url().stream, ret.Message)
 			case *model.UnknownRet:
@@ -310,7 +331,7 @@ func (conn *CommonConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 			} else if err != nil && line != "" {
 				log.Println("receve err and non-empty from stdoutbuf", err, line)
 				line = strings.TrimLeft(line, "\u0000")
-				handleRecevie(ctx, retChan, line, err)
+				handleRecevie(ctx, conn.Loc, retChan, line, err)
 				return
 			} else if line == "" {
 				log.Println("read empty line from stdoutbuf")
@@ -318,7 +339,7 @@ func (conn *CommonConn) StdoutReceive(ctx context.Context) chan RetAndErr {
 				line = strings.TrimLeft(line, "\u0000")
 
 				log.Println("handle stdout", line)
-				if exit := handleRecevie(ctx, retChan, line, nil); exit {
+				if exit := handleRecevie(ctx, conn.Loc, retChan, line, nil); exit {
 					log.Println("exit stdout")
 					return
 				}
@@ -342,13 +363,13 @@ func (conn *CommonConn) StderrReceive(ctx context.Context) chan RetAndErr {
 			} else if err != nil && line != "" {
 				log.Println("receve err and non-empty from stderrbuf", err, line)
 				line = strings.TrimLeft(line, "\u0000")
-				handleRecevie(ctx, retChan, line, err)
+				handleRecevie(ctx, conn.Loc, retChan, line, err)
 				return
 			} else if line == "" {
 				log.Println("read empty line from stderrbuf")
 			} else {
 				line = strings.TrimLeft(line, "\u0000")
-				if exit := handleRecevie(ctx, retChan, line, nil); exit {
+				if exit := handleRecevie(ctx, conn.Loc, retChan, line, nil); exit {
 					return
 				}
 			}
@@ -358,7 +379,7 @@ func (conn *CommonConn) StderrReceive(ctx context.Context) chan RetAndErr {
 	return retChan
 }
 
-func handleRecevie(ctx context.Context, retChan chan RetAndErr, line string, err error) (exist bool) {
+func handleRecevie(ctx context.Context, loc *time.Location, retChan chan RetAndErr, line string, err error) (exist bool) {
 	line = strings.TrimRight(line, "\r\n")
 	errs := make([]error, 0)
 	if err != nil {
@@ -386,7 +407,7 @@ func handleRecevie(ctx context.Context, retChan chan RetAndErr, line string, err
 		ret = &model.DataRet{}
 		line = line[1:]
 	case 'T':
-		ret = &model.StatRet{}
+		ret = &model.StatRet{Loc: loc}
 		line = line[1:]
 	case 'X':
 		ret = &model.ExtRet{}

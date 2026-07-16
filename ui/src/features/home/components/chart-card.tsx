@@ -81,13 +81,13 @@ export function ChartCard() {
         <Card className="pt-0">
             <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
                 <div className="grid flex-1 gap-1">
-                    <CardTitle>Logs stats</CardTitle>
+                    <CardTitle>Stats</CardTitle>
                 </div>
                 <Button variant="outline" size="icon-sm" onClick={toggleShow} >
                     {show ? <IconEye /> : <IconEyeOff />}
                 </Button>
             </CardHeader>
-            {show && <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+            {show && stats.length > 0 && <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
                 <StatsChart data={stats} />
             </CardContent>
             }

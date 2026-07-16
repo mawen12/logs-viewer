@@ -1,7 +1,7 @@
 import { useGetLogs } from "@/api/log/getLogs";
-import type { MessageCompose, Stat } from "@/api/type";
 import { type Mode, type TimeRangeValue } from "@/constant/time-range";
 import { useQueryStore } from "@/store/use-query-store";
+import type { MessageCompose, Stat } from "@/types/log";
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 
 export type LogsProviderProps = {

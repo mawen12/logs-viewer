@@ -13,11 +13,12 @@ func (app *Application) routes() http.Handler {
 	mux.HandleFunc("/", ui.GetHandler().ServeHTTP)
 	mux.HandleFunc("GET /static/*path", http.StripPrefix("static", ui.GetHandler()).ServeHTTP)
 	mux.HandleFunc("GET /favicon.svg", ui.GetHandler().ServeHTTP)
-	
+
 	// sources
 	{
 		mux.HandleFunc("GET /api/query", app.query)
 		mux.HandleFunc("GET /api/sources", app.wrapper(app.listSource))
+		mux.HandleFunc("GET /api/sources/{id}", app.wrapper(app.getSourceDetail))
 		mux.HandleFunc("GET /api/sources/tree", app.wrapper(app.listSourceTree))
 		mux.HandleFunc("DELETE /api/sources/{id}", app.wrapper(app.deleteSource))
 		mux.HandleFunc("POST /api/sources", app.wrapper(app.addSource))

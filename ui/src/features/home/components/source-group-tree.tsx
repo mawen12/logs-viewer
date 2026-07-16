@@ -29,7 +29,7 @@ function isChildrenNode(node: TreeNode) {
 }
 
 export function SourceGroupTree({ nodes }: { nodes: TreeNode[] }) {
-    const { sources, updateSource, hasSource, startTime, endTime } = useQueryStore()
+    const { updateSource, hasSource } = useQueryStore()
 
     const parentMap = useMemo((): Map<string, TreeNode> => {
         const parentMap = new Map<string, TreeNode>()
@@ -41,7 +41,7 @@ export function SourceGroupTree({ nodes }: { nodes: TreeNode[] }) {
     }, [nodes])
 
     const toggleSelect = useCallback((node: TreeNode) => {
-            updateSource(node, parentMap.get(node?.parentId))
+        updateSource(node, parentMap.get(node?.parentId))
     }, [parentMap, updateSource])
 
     return (
@@ -49,10 +49,6 @@ export function SourceGroupTree({ nodes }: { nodes: TreeNode[] }) {
             {nodes.map((node) => (
                 <TreeItem key={node.id} node={node} checkSelected={() => hasSource(node.id)} selected={hasSource(node.id)} toggleSelect={toggleSelect} />
             ))}
-
-            {sources.size}
-            {startTime}
-            {endTime}
         </ul>
     )
 }
@@ -76,8 +72,8 @@ function TreeItem({ node, checkSelected, selected, toggleSelect }: { node: TreeN
 
     if (isChildrenNode(node)) {
         return (
-            <li className="px-2 py-1 text-sm">
-                <Field orientation={'horizontal'}>
+            <li className="px-1 text-sm">
+                <Field orientation={'horizontal'} className="h-8 items-center justify-start">
                     <Checkbox
                         id={`${node.id}-${node.label}`}
                         name={node.label}
@@ -101,7 +97,7 @@ function TreeItem({ node, checkSelected, selected, toggleSelect }: { node: TreeN
                         onCheckedChange={() => toggleSelect(node)}
                     />
                     <CollapsibleTrigger asChild>
-                        <Button className="h-7 " title={node.label} variant={"ghost"}>
+                        <Button className="h-8 " title={node.label} variant={"ghost"}>
                             {node.label}
                             <ChevronRight className='ms-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180' />
                         </Button>

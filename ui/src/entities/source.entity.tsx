@@ -1,12 +1,17 @@
+import { DataTableDetailRow } from "@/features/sources/components/sources-data-table";
+import type { Source } from "@/features/sources/data/schema";
 import type { DataTableEntity } from "@/types/data-table";
 
-export const sourceTableEntity: DataTableEntity = {
+export const sourceTableEntity: DataTableEntity<Source> = {
     id: 'sourceTableEntity',
     itemValue: 'id',
     showToolbar: false,
     headers: [
         {
             key: 'data-table-select',
+        },
+        {
+            key: 'data-table-expand',
         },
         {
             key: 'id',
@@ -67,11 +72,17 @@ export const sourceTableEntity: DataTableEntity = {
         }
     ],
     massActions: [],
-    globalActions: [
-        {
-            id: 'evictAll',
-            label: 'Evict All',
-            icon: 'broom'
-        }
-    ]
+    rowAction: {
+        type: 'Detail',
+        component: (row) => {
+            return <DataTableDetailRow row={row} />
+        },
+    },
+globalActions: [
+    {
+        id: 'evictAll',
+        label: 'Evict All',
+        icon: 'broom'
+    }
+]
 }

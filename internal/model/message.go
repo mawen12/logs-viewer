@@ -185,6 +185,7 @@ func (r *DataRet) Decode(src []byte) error {
 }
 
 type StatRet struct {
+	Loc   *time.Location
 	Time  time.Time
 	Count int
 }
@@ -215,7 +216,7 @@ func (r *StatRet) Decode(src []byte) error {
 		return fmt.Errorf("invalid message format for StatRet, content is %s", src)
 	}
 
-	r.Time, err = time.Parse("2006-01-02 15:04", string(src[:idx]))
+	r.Time, err = time.ParseInLocation("2006-01-02 15:04", string(src[:idx]), r.Loc)
 	if err != nil {
 		return fmt.Errorf("invalid message format for StatRet, content is %s", src)
 	}
@@ -248,9 +249,17 @@ func (r *DebugRet) Decode(src []byte) error {
 }
 
 // X:<Key>:<Value>
+type ExtKey string
+
+const (
+	Timezone     ExtKey = "timezone"
+	FirstLogLine ExtKey = "firstLogLine"
+	LastLogLine  ExtKey = "lastLogLine"
+)
+
 type ExtRet struct {
-	Key   string
-	Value string
+	Key   ExtKey
+	Value interface{}
 }
 
 func (r *ExtRet) Prefix() string {
@@ -274,8 +283,25 @@ func (r *ExtRet) Decode(src []byte) error {
 		return fmt.Errorf("invalid message format for ExtRet, content is %s", src)
 	}
 
-	r.Key = string(src[:idx])
-	r.Value = string(src[idx+1:])
+	switch string(src[:idx]) {
+	case "tz":
+		r.Key = Timezone
+		tz := string(src[idx+1:])
+		loc, err := time.LoadLocation(tz)
+		if err != nil {
+			return err
+		}
+		r.Value = loc
+
+	case "firstLogline":
+		r.Key = FirstLogLine
+		r.Value = string(src[idx+1:])
+	case "lastLogline":
+		r.Key = LastLogLine
+		r.Value = string(src[idx+1:])
+	default:
+		fmt.Printf("key:%s is invalid", string(src[:idx]))
+	}
 	return nil
 }
 

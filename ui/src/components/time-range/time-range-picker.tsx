@@ -92,7 +92,7 @@ export function TimeRangePicker() {
                     {timeRange.mode === 'last' ? <IconClockHour5 /> : <Calendar />} {label}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-auto p-0" align={'center'}>
+            <DropdownMenuContent className="w-auto p-0" align={'end'}>
                 <div className='flex flex-row gap-2'>
                     <TimeRangeForm className="w-72" initStartTime={startTime} initEndTime={endTime} onSubmit={setStartEndTime} onCancel={() => setOpen(false)} />
 

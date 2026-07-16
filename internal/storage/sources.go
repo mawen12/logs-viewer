@@ -26,7 +26,7 @@ func (s *Storage) DeleteSource(ctx context.Context, id int64) error {
 func (s *Storage) UpdateSource(ctx context.Context, id int64, source model.Source) error {
 	_, err := s.db.Exec(`
 		UPDATE sources 
-		SET source_name = $1, source_group = $2, source = $3, pattern
+		SET source_name = $1, source_group = $2, source = $3, pattern = $4
 		WHERE source_id = $4
 	`, source.Name, source.Group, source.Source, source.Pattern, id)
 	return err
@@ -52,4 +52,18 @@ func (s *Storage) ListSource(ctx context.Context) ([]model.Source, error) {
 	}
 
 	return sources, nil
+}
+
+func (s *Storage) GetSource(ctx context.Context, id int64) (model.Source, error) {
+	row := s.db.QueryRow(`
+		SELECT source_id, source_name, source_group, source, pattern FROM sources
+		WHERE source_id = $1
+	`, id)
+
+	var source model.Source
+	if err := row.Scan(&source.ID, &source.Name, &source.Group, &source.Source, &source.Pattern); err != nil {
+		return model.Source{}, err
+	}
+
+	return source, nil
 }

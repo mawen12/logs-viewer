@@ -1,13 +1,13 @@
 import type { Log } from "@/api/type";
-import { useLogStore } from "@/store/useLogStore";
+import { useLogs } from "@/features/home/components/logs-provider";
 import { useMemo } from "react";
 import { CardLogs } from "./CardLogs";
 
 export function ComposeLogs() {
-    const { messageComposes } = useLogStore();
+    const { logs } = useLogs();
 
     const composedLogs = useMemo<Log[]>(() => {
-        const allLogs = messageComposes.flatMap(mc => mc.logs || []);
+        const allLogs = logs.flatMap(mc => mc.logs || []);
 
         allLogs.sort((a, b) => {
             if (a.time != b.time) {
@@ -18,7 +18,7 @@ export function ComposeLogs() {
         });    
 
         return allLogs;
-    }, [messageComposes]);
+    }, [logs]);
 
     return (
         <CardLogs logs={composedLogs}/>   

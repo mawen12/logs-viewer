@@ -153,6 +153,36 @@ func (app *Application) listSource(w http.ResponseWriter, r *http.Request) (inte
 	return app.storage.ListSource(r.Context())
 }
 
+func (app *Application) getSourceDetail(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := app.storage.GetSource(r.Context(), id)
+	if err != nil {
+		return nil, err
+	}
+
+	conn, ok := app.conn.Get(result)
+	if !ok {
+		return result, nil
+	}
+
+	var detail struct {
+		model.Source
+		Timezone     string `json:"timezone"`
+		FirstLogLine string `json:"firstLogLine"`
+		LastLogLine  string `json:"lastLogLine"`
+	}
+	detail.Source = result
+	detail.Timezone = conn.Timezone()
+	detail.FirstLogLine, detail.LastLogLine = conn.LogLine()
+
+	return detail, nil
+}
+
 func (app *Application) listSourceTree(w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	result, err := app.storage.ListSource(r.Context())
 	if err != nil {
