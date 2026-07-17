@@ -34,7 +34,8 @@ export function SourcesDataTable() {
       />
       <div className='flex h-full min-h-0 flex-1 overflow-hidden rounded-md border'>
         <Table className='min-h-0 flex-1 '>
-          <TableHeader className='top-0 sticky bg-white dark:bg-black z-10'>
+          {/* <TableHeader className='top-0 sticky bg-white dark:bg-black z-10'> */}
+          <TableHeader className='top-0 sticky bg-muted/50 z-10'>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
