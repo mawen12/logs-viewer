@@ -39,9 +39,9 @@ export function Header({ className, fixed, compact, children, ...props }: Header
           offset > 10 && fixed && 'after:absolute after:inset-0 after:-z-10 after:bg-background/20 after:backdrop-blur-lg'
         )}
       >
-        <SidebarTrigger variant='outline' className='max-md:scale-125' />
+        <SidebarTrigger variant='outline' className='size-8 max-md:scale-125' />
 
-        <Separator orientation='vertical' className='h-6' />
+        <Separator orientation='vertical' className='h-8' />
         {children}
       </div>
     </header>

@@ -14,28 +14,29 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/mawen12/logs-viewer/internal/scripts"
 	"golang.org/x/crypto/ssh"
 )
 
-var (
-	//go:embed scripts/startup.sh.tmpl
-	startShTemplate string
-	//go:embed scripts/index.sh.tmpl
-	indexShTemplate string
-	//go:embed scripts/query.sh.tmpl
-	queryShTemplate string
-	//go:embed scripts/clean.sh.tmpl
-	cleanShTmpleate string
+// var (
+// 	//go:embed scripts/startup.sh.tmpl
+// 	startShTemplate string
+// 	//go:embed scripts/index.sh.tmpl
+// 	indexShTemplate string
+// 	//go:embed scripts/query.sh.tmpl
+// 	queryShTemplate string
+// 	//go:embed scripts/clean.sh.tmpl
+// 	cleanShTmpleate string
 
-	//go:embed scripts/agent.sh
-	agentSh string
-	//go:embed scripts/agent_lib.sh
-	libSh string
-	//go:embed scripts/agent_index.sh
-	indexSh string
-	//go:embed scripts/agent_search.sh
-	searchSh string
-)
+// 	//go:embed scripts/agent.sh
+// 	agentSh string
+// 	//go:embed scripts/agent_lib.sh
+// 	libSh string
+// 	//go:embed scripts/agent_index.sh
+// 	indexSh string
+// 	//go:embed scripts/agent_search.sh
+// 	searchSh string
+// )
 
 type SshConnConfig struct {
 }
@@ -271,17 +272,17 @@ func (conn *CommonConn) Start(ctx context.Context) (*MessageCompose, error) {
 	params := map[string]any{
 		"PrefixPath":    conn.prefixPath,
 		"AgentPath":     "agent.sh",
-		"AgentContent":  agentSh,
+		"AgentContent":  scripts.AgentSh,
 		"LibPath":       "agent_lib.sh",
-		"LibContent":    libSh,
+		"LibContent":    scripts.LibSh,
 		"IndexPath":     "agent_index.sh",
-		"IndexContent":  indexSh,
+		"IndexContent":  scripts.IndexSh,
 		"SearchPath":    "agent_search.sh",
-		"SearchContent": searchSh,
+		"SearchContent": scripts.SearchSh,
 		"IndexFile":     conn.indexFile,
 		"LogFile":       conn.url.log,
 	}
-	bs, err := conn.template(startShTemplate, params)
+	bs, err := conn.template(scripts.StartShTemplate, params)
 	if err != nil {
 		return nil, err
 	}
@@ -299,7 +300,7 @@ func (conn *CommonConn) Index(ctx context.Context) (*MessageCompose, error) {
 		"IndexFile":  conn.indexFile,
 		"LogFile":    conn.url.log,
 	}
-	bs, err := conn.template(indexShTemplate, params)
+	bs, err := conn.template(scripts.IndexShTemplate, params)
 	if err != nil {
 		return nil, err
 	}
@@ -325,7 +326,7 @@ func (conn *CommonConn) Query(ctx context.Context, param QueryParam) (*MessageCo
 		"HasLineUtil":  param.LineUtil != 0,
 		"LineUtil":     param.LineUtil,
 	}
-	bs, err := conn.template(queryShTemplate, params)
+	bs, err := conn.template(scripts.QueryShTemplate, params)
 	if err != nil {
 		return nil, err
 	}
@@ -341,7 +342,7 @@ func (conn *CommonConn) Clean(ctx context.Context) (*MessageCompose, error) {
 	params := map[string]any{
 		"PrefixPath": conn.prefixPath,
 	}
-	bs, err := conn.template(cleanShTmpleate, params)
+	bs, err := conn.template(scripts.CleanShTmpleate, params)
 	if err != nil {
 		return nil, err
 	}
